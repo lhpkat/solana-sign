@@ -1,0 +1,15 @@
+@import '~antd/dist/antd.css';
+#root,
+.App,
+.App>section {
+    width: 100%;
+    height: 100%;
+}
+
+.sider-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 500px;
+    padding: 50px 0;
+}
