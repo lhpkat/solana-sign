@@ -1,0 +1,4 @@
+.page-footer-box {
+    display: flex;
+    justify-content: flex-end;
+}

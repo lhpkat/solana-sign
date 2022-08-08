@@ -1,3 +1,23 @@
 .steps-contain {
     min-height: 300px;
 }
+
+.jump-to-create-box {
+    width: 150px;
+    height: 100px;
+    display: flex;
+    background-color: rgb(253 247 243);
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    border-radius: 15px;
+}
+
+.jump-to-create-box svg {
+    font-size: 40px;
+    margin-left: 10px;
+}
+
+.jump-to-create-box:hover {
+    background-color: rgb(164, 75, 15);
+}

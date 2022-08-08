@@ -1,19 +1,20 @@
-import React, { createContext, useContext } from 'react';
-import { BrowserRouter, Route, Link } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { useLocation } from "react-router-dom";
 import { connect } from 'react-redux';
-import { Layout, message } from 'antd';
+import { Layout } from 'antd';
+import { bindPushState } from '../lib';
 import Routes from '../router/index';
 import SiderContain from '../components/SiderContain';
+import PageFooter from '../components/PageFooter';
 import './App.css';
-import { useEffect } from 'react';
 
-const { Sider, Content } = Layout;
+const { Footer, Sider, Content } = Layout;
 
 
 const App = ({ dispatch }) => {
-
+  let location = useLocation();
   useEffect(() => {
-
+    bindPushState();
   }, [])
 
   return (
@@ -28,10 +29,14 @@ const App = ({ dispatch }) => {
         </Sider>
         <Layout>
           <Content>
-            <BrowserRouter>
-              <Routes />
-            </BrowserRouter>
+            <Routes />
           </Content>
+          <Footer>
+            {
+              location.pathname !== '/' &&
+              <PageFooter />
+            }
+          </Footer>
         </Layout>
       </Layout>
     </div>

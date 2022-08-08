@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Steps, Button, message, Typography } from 'antd';
 import { PlusCircleTwoTone } from '@ant-design/icons';
+import { TokenListProvider } from '@solana/spl-token-registry'
+import { Connection, PublicKey, clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import EllipsisMiddle from '../EllipsisMiddle';
 import './index.css';
 
 
 const Wallet = ({ dispatch, user }) => {
-
     const getProvider = () => {
         if ('phantom' in window) {
             const provider = window.phantom?.solana;
@@ -20,8 +21,9 @@ const Wallet = ({ dispatch, user }) => {
         window.open('https://phantom.app/', '_blank');
     };
 
-    const getAddress = async() => {
+    const connectWallet = async() => {
         const provider = getProvider();
+
         try {
             const resp = await provider.connect();
 
@@ -36,6 +38,7 @@ const Wallet = ({ dispatch, user }) => {
 
     const disconnect = () => {
         getProvider().disconnect();
+
         dispatch({
             type: 'common/changeUser',
             payload: ''
@@ -48,25 +51,25 @@ const Wallet = ({ dispatch, user }) => {
         });
     }
 
-    useEffect(() => {
-
-    }, [])
-
     return (
         <div className="wallet-contain">
             {
                 !user
-                    ? <div onClick={ () => { getAddress(); } }>
+                    ? <Button onClick={connectWallet}>
                         登录
-                    </div>
-                    : <div onClick={ () => { disconnect(); } }>
-                        退出
+                    </Button>
+                    : <div>
+                        <Button onClick={ disconnect }>
+                            退出
+                        </Button>
                         <EllipsisMiddle suffixCount={5}>
                             { user }
                         </EllipsisMiddle>
+                        <Button onClick={ () => { paste(user) } }>
+                            复制
+                        </Button>
                     </div>
             }
-            <div onClick={ () => { paste(user) }}>粘贴</div>
         </div>
     );
 }
