@@ -1,0 +1,13 @@
+.wallet-contain {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-box {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: aliceblue;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

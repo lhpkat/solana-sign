@@ -1,5 +1,6 @@
 .prepare-document-box {
     display: flex;
+    padding: 20px;
 }
 
 .canvas-panal {
@@ -47,7 +48,9 @@
 }
 
 .action-panal {
-    width: 300px;
+    /* width: 300px; */
+    flex: 1;
+    padding: 20px;
 }
 
 .sign-box {
@@ -60,4 +63,54 @@
 
 .sign-item {
     position: absolute;
+}
+
+.page-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.divider {
+    height: 4px;
+    width: 100%;
+    margin: 40px 0;
+    border-radius: 2px;
+    background-color: #b5b1b1;
+    border: 2px solid #b5b1b1;
+}
+
+.signers-box-title {
+    font-size: 24px;
+    line-height: 32px;
+    font-family: "Circular-Bold", sans-serif;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: rgb(110 113 121);
+}
+
+.add-myself {
+    cursor: pointer;
+    padding: 10px 20px;
+    width: 150px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #c1b2b2;
+    color: #c1b2b2;
+    margin: 10px 0;
+}
+
+.add-myself:hover {
+    border: 2px solid #1a1010;
+    color: #1a1010;
+}
+
+.signer {
+    border-radius: 12px !important;
+    padding: 5px 10px !important;
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Steps, Button, message, Typography } from 'antd';
-import { PlusCircleTwoTone } from '@ant-design/icons';
+import { Button, message, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
 import { TokenListProvider } from '@solana/spl-token-registry'
 import { Connection, PublicKey, clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import EllipsisMiddle from '../EllipsisMiddle';
@@ -58,17 +58,17 @@ const Wallet = ({ dispatch, user }) => {
                     ? <Button onClick={connectWallet}>
                         登录
                     </Button>
-                    : <div>
+                    : <>
+                        <div className="user-box">
+                            <EllipsisMiddle suffixCount={5}>
+                                { user }
+                            </EllipsisMiddle>
+                            <CopyOutlined onClick={ () => { paste(user) } }/>
+                        </div>
                         <Button onClick={ disconnect }>
                             退出
                         </Button>
-                        <EllipsisMiddle suffixCount={5}>
-                            { user }
-                        </EllipsisMiddle>
-                        <Button onClick={ () => { paste(user) } }>
-                            复制
-                        </Button>
-                    </div>
+                    </>
             }
         </div>
     );
