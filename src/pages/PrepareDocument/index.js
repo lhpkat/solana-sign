@@ -6,6 +6,7 @@ import cx from "classnames";
 import { jsPDF } from "jspdf";
 import { Document, Page, pdfjs } from "react-pdf";
 import html2canvas from 'html2canvas';
+import { fabric } from "fabric";
 import { ReactSketchCanvas } from 'react-sketch-canvas';
 import {
     getCanvasByDom,
@@ -31,6 +32,53 @@ const PrepareDocument = ({ dispatch, user }) => {
     const onDocumentLoadSuccess = ({ numPages }) => {
         setNumPages(numPages);
     };
+
+    const handleCanvasActionRenderer = (baseId, totalOfPages) => {
+        for (let i = 0; i < totalOfPages; i += 1) { 
+            const canvas = new fabric.Canvas(`${baseId}-${i}`);
+            const rect = new fabric.Rect({
+                width: 100,
+                height: 20,
+                fill: '#f55',
+                opacity: 0.7
+            });
+            var circle = new fabric.Circle({
+                radius: 20, fill: 'green', left: 100, top: 100
+              });
+            canvas.add(rect, circle);
+            console.log('canvas', canvas, document.querySelector(`#${baseId}-${i}`));
+        }
+    }
+
+    const handleCanvasItemActionRenderer = (id) => {
+        const canvas = new fabric.Canvas(id, {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: 500,
+            height: 647,
+        });
+        const rect = new fabric.Rect({
+            width: 200,
+            height: 150,
+            fill: '#eaf1ff',
+            borderColor: '#618cf9',
+            hasBorders: false,
+            // hasControls: false,
+            borderDashArray: ['dash'],
+            opacity: 0.7,
+            rx: 10,
+            ry: 10
+        });
+
+        rect.on('selected', function(options) {
+            if (options.target) {
+              console.log('有对象被点击咯! ', options.target.type);
+            }
+        });
+
+        canvas.add(rect);
+    }
 
     useEffect(() => {
         userRef.current = user;
@@ -69,18 +117,15 @@ const PrepareDocument = ({ dispatch, user }) => {
             // canvasToPdf(image, doc);
             if (index === 0) {
                 doc.addImage(image, "JPEG", 0, 0, 210, 300);
-                // // 设置透明度.
-                // doc.saveGraphicsState();
-                // doc.setGState(new doc.GState({ opacity: 0.2 }));
-                // doc.restoreGraphicsState();
             } else {
                 doc.addPage();
                 doc.addImage(image, "JPEG", 0, 0, 210, 300);
-                // // 设置透明度.
-                // doc.saveGraphicsState();
-                // doc.setGState(new doc.GState({ opacity: 0.2 }));
-                // doc.restoreGraphicsState();
             }
+
+            // // 设置透明度.
+            // doc.saveGraphicsState();
+            // doc.setGState(new doc.GState({ opacity: 0.2 }));
+            // doc.restoreGraphicsState();
         });
 
         doc.save("test.pdf");
@@ -116,9 +161,14 @@ const PrepareDocument = ({ dispatch, user }) => {
             for (let i = 0; i < +numPages; i += 1) {
                 temp.push(
                     <Page
-                        width='500'
+                        width={ 500 }
+                        className="page"
                         key={ `${i}-${t}` }
                         pageNumber={ i + 1 }
+                        onLoadSuccess={ ({ _pageIndex }) => {
+                            console.log('_pageIndex', _pageIndex);
+                            handleCanvasItemActionRenderer(`canvas-action-${i}`);
+                        } }
                         renderAnnotationLayer={ false }
                         renderTextLayer={ false }
                         inputRef={ (ref) => {
@@ -127,11 +177,13 @@ const PrepareDocument = ({ dispatch, user }) => {
                             }
                         } }
                     >
-                        <div
+                        <canvas
+                            width="500"
+                            id={ `canvas-action-${i}` }
                             className="page-mask"
-                            // onMouseEnter={ (e) => handleAddSignDom(e, i) }
-                            // onMouseLeave={ startListen.current = false }
-                        />
+                        // onMouseEnter={ (e) => handleAddSignDom(e, i) }
+                        // onMouseLeave={ startListen.current = false }
+                        ></canvas>
                     </Page>
                 );
             }
@@ -170,6 +222,7 @@ const PrepareDocument = ({ dispatch, user }) => {
                         onLoadSuccess={onDocumentLoadSuccess}
                     >
                         { RenderPage }
+                        {/* <RenderPage /> */}
                     </Document>
                 </div>
             </div>
@@ -219,6 +272,7 @@ const PrepareDocument = ({ dispatch, user }) => {
                     }
                 </div>
             </div>
+            <canvas id='test'></canvas>
         </div>
     )
 }
