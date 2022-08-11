@@ -12,6 +12,7 @@ import {
     getCanvasByDom,
     canvasToPdf,
     downPdf,
+    useListenAndCreateSignView
 } from '../../lib';
 import './index.css';
 
@@ -28,6 +29,23 @@ const PrepareDocument = ({ dispatch, user }) => {
     const [numPages, setNumPages] = useState(0);
     const startListen = useRef(false);
     const [signers, setSigners] = useState({});
+    const activeSigner = useRef('');
+
+    const SignDom = () => {
+        return (
+            <div className='sign-dom'>
+                { activeSigner.current }
+            </div>
+        )
+    }
+
+    const [starter, FloatModal, success] = useListenAndCreateSignView(SignDom, true, (e) => {
+        console.log('callbacke', e);
+    });
+
+    useEffect(() => {
+        console.log('success', success);
+    }, [success])
 
     const onDocumentLoadSuccess = ({ numPages }) => {
         setNumPages(numPages);
@@ -42,42 +60,73 @@ const PrepareDocument = ({ dispatch, user }) => {
                 fill: '#f55',
                 opacity: 0.7
             });
-            var circle = new fabric.Circle({
-                radius: 20, fill: 'green', left: 100, top: 100
-              });
+            const circle = new fabric.Circle({
+                radius: 20,
+                fill: 'green',
+                left: 100,
+                top: 100
+            });
+
             canvas.add(rect, circle);
-            console.log('canvas', canvas, document.querySelector(`#${baseId}-${i}`));
         }
     }
 
-    const handleCanvasItemActionRenderer = (id) => {
+    const handleCanvasItemActionRenderer = (id, index) => {
         const canvas = new fabric.Canvas(id, {
-            position: 'absolute',
-            left: 0,
-            top: 0,
+            // position: 'absolute',
+            // left: 0,
+            // top: 0,
             width: 500,
             height: 647,
         });
+
+        // canvas.clear().renderAll();
+        canvas.on('mouse:down', function (options) {
+            console.log('startListen.current', startListen.current);
+            if (!startListen.current) return;
+            startListen.current = false;
+            handleAddSignToCanvas(canvas, options);
+        });
+
+    }
+
+    const handleAddSignToCanvas = (fabricCanvas, options) => {
+        console.log('activeSigner', activeSigner.current);
         const rect = new fabric.Rect({
             width: 200,
             height: 150,
             fill: '#eaf1ff',
-            borderColor: '#618cf9',
-            hasBorders: false,
+            // borderColor: '#618cf9',
+            // hasBorders: false,
             // hasControls: false,
-            borderDashArray: ['dash'],
+            // borderDashArray: ['dash'],
             opacity: 0.7,
             rx: 10,
-            ry: 10
+            ry: 10,
+            originX: 'center',
+            originY: 'center'
+        });
+        const text = new fabric.Text(activeSigner.current, {
+            fontSize: 20,
+            fontWeight: 400,
+            fontFamily: 'BlinkMacSystemFont',
+            originX: 'center',
+            originY: 'center'
+        });
+        const text_desc = new fabric.Text("在此签名", {
+            fontSize: 12,
+            color: '#e8e8e8',
+            left: 30,
+            top: 50,
+        });
+        const group = new fabric.Group([rect, text, text_desc], {
+            width: 200,
+            height: 150,
+            left: options.e.offsetX - 100,
+            top: options.e.offsetY - 75,
         });
 
-        rect.on('selected', function(options) {
-            if (options.target) {
-              console.log('有对象被点击咯! ', options.target.type);
-            }
-        });
-
-        canvas.add(rect);
+        fabricCanvas.add(group);
     }
 
     useEffect(() => {
@@ -166,8 +215,7 @@ const PrepareDocument = ({ dispatch, user }) => {
                         key={ `${i}-${t}` }
                         pageNumber={ i + 1 }
                         onLoadSuccess={ ({ _pageIndex }) => {
-                            console.log('_pageIndex', _pageIndex);
-                            handleCanvasItemActionRenderer(`canvas-action-${i}`);
+                            handleCanvasItemActionRenderer(`canvas-action-${_pageIndex}`, _pageIndex);
                         } }
                         renderAnnotationLayer={ false }
                         renderTextLayer={ false }
@@ -175,6 +223,9 @@ const PrepareDocument = ({ dispatch, user }) => {
                             if (ref) {
                                 canvasBoxWrap.current[i] = ref;
                             }
+                        } }
+                        canvasRef={ (ref) => {
+                            // ref.id = `canvas-action-${i}`
                         } }
                     >
                         <canvas
@@ -198,8 +249,12 @@ const PrepareDocument = ({ dispatch, user }) => {
 
     const handleAddSigner = (value) => {
         if (value) {
-            console.log({ ...signers, [value]: value });
-            setSigners({ ...signers, [value]: value });
+            setSigners({
+                ...signers,
+                [value]: value.length > 12
+                            ? value.substring(0, 6) + '...' + value.substring(user.length - 3)
+                            : value
+            });
             form.resetFields();
         }
     }
@@ -214,7 +269,8 @@ const PrepareDocument = ({ dispatch, user }) => {
 
     return (
         <div className="prepare-document-box">
-            <div className={`canvas-panal ${startListen.current ? 'overflow-hidden' : ''}`}>
+            <FloatModal />
+            <div className="canvas-panal">
                 <div className="doc-box">
                     <Document
                         // file="https://arweave.net/KoRjEpshjPZHnqVj4BB_DKimKXpa1nkGlrvpmtMTPeA"
@@ -222,13 +278,14 @@ const PrepareDocument = ({ dispatch, user }) => {
                         onLoadSuccess={onDocumentLoadSuccess}
                     >
                         { RenderPage }
-                        {/* <RenderPage /> */}
                     </Document>
                 </div>
             </div>
             <div className="action-panal">
                 <Button
-                    onClick={ addSign }
+                    onClick={ (e) => {
+                        addSign();
+                    } }
                 >添加签名</Button>
                 <Button
                     onClick={ save }
@@ -260,19 +317,19 @@ const PrepareDocument = ({ dispatch, user }) => {
                                 className="signer"
                                 key={ item }
                                 closable
+                                onClick={ (e) => {
+                                    startListen.current = true;
+                                    activeSigner.current = item;
+                                    starter(e);
+                                } }
                                 onClose={ () => deleteTag(item) }
                             >
-                                {
-                                    item.length > 12
-                                        ? `${item.substring(0, 6)}...${item.substring(item.length - 3)}`
-                                        : item
-                                }
+                                { item }
                             </Tag>
                         ))
                     }
                 </div>
             </div>
-            <canvas id='test'></canvas>
         </div>
     )
 }
