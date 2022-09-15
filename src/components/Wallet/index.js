@@ -4,11 +4,36 @@ import { Button, message, Typography } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { TokenListProvider } from '@solana/spl-token-registry'
 import { Connection, PublicKey, clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { useAtom } from 'jotai';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import EllipsisMiddle from '../EllipsisMiddle';
 import './index.css';
+import { currentUserAtom } from '../../store';
+import { aboutSolanaWeb3 } from '../../lib';
 
+const Wallet = () => {
+    const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+    // const { wallet } = useWallet();
+    // const { setVisible } = useWalletModal();
 
-const Wallet = ({ dispatch, user }) => {
+    // const onRequestConnectWallet = () => {
+    //     setVisible(true);
+    // };
+
+    // // Prompt the user to connect their wallet
+    // if (!wallet) {
+    //     return <button onClick={onRequestConnectWallet}>Connect Wallet</button>;
+    // }
+
+    // // Displays the connected wallet address
+    // return (
+    //     <main>
+    //         <p>Wallet successfully connected!</p>
+    //         <p>{wallet.publicKey.toBase58()}</p>
+    //     </main>
+    // );
+
     const getProvider = () => {
         if ('phantom' in window) {
             const provider = window.phantom?.solana;
@@ -27,10 +52,7 @@ const Wallet = ({ dispatch, user }) => {
         try {
             const resp = await provider.connect();
 
-            dispatch({
-                type: 'common/changeUser',
-                payload: resp.publicKey.toString()
-            })
+            setCurrentUser(resp.publicKey.toString());
         } catch (err) {
             message.error('User rejected the request.')
         }
@@ -38,11 +60,7 @@ const Wallet = ({ dispatch, user }) => {
 
     const disconnect = () => {
         getProvider().disconnect();
-
-        dispatch({
-            type: 'common/changeUser',
-            payload: ''
-        })
+        setCurrentUser('');
     }
 
     const paste = (data) => {
@@ -51,37 +69,45 @@ const Wallet = ({ dispatch, user }) => {
         });
     }
 
+    const handleSubString = (value) => {
+        return (
+            value.length > 12
+            ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
+            : value
+        )
+    }
+
+    const connectPhantomWallet = async() => {
+        const wallet = aboutSolanaWeb3.wallets.Phantom.getAdapter();
+        await wallet.connect();
+
+        const owner = wallet.publicKey.toString();
+        console.log('wallet', { wallet, owner });
+    }
+
+    useEffect(() => {
+        connectPhantomWallet();
+    }, [])
+
     return (
         <div className="wallet-contain">
             {
-                !user
-                    ? <Button onClick={connectWallet}>
-                        登录
+                !currentUser
+                ? <Button onClick={connectWallet}>
+                    登录
+                </Button>
+                : <>
+                    <div className="user-box">
+                        { handleSubString(currentUser) }
+                        <CopyOutlined onClick={ () => { paste(currentUser) } }/>
+                    </div>
+                    <Button onClick={ disconnect }>
+                        退出
                     </Button>
-                    : <>
-                        <div className="user-box">
-                            <EllipsisMiddle suffixCount={5}>
-                                { user }
-                            </EllipsisMiddle>
-                            <CopyOutlined onClick={ () => { paste(user) } }/>
-                        </div>
-                        <Button onClick={ disconnect }>
-                            退出
-                        </Button>
-                    </>
+                </>
             }
         </div>
     );
 }
 
-export default connect((state) => {
-    const {
-        common: {
-            user,
-        }
-    } = state;
-
-    return {
-        user
-    }
-})(Wallet);
+export default Wallet;

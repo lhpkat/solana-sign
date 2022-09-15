@@ -1,5 +1,14 @@
 .steps-contain {
     min-height: 300px;
+    max-width: 150px;
+    margin: 0 auto;
+}
+
+.slider-contain {
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .jump-to-create-box {

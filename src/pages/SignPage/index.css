@@ -51,6 +51,17 @@
     /* width: 300px; */
     flex: 1;
     padding: 20px;
+    position: relative;
+}
+
+footer {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+}
+
+footer>a {
+    margin-right: 20px;
 }
 
 .sign-box {
@@ -74,7 +85,7 @@
     position: absolute !important;
     top: 0;
     left: 0;
-    height: 100% !important;
+    /* height: 100% !important; */
 }
 
 .title {

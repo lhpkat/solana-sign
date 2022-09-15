@@ -1,59 +1,69 @@
 {
-  "name": "solana-sign-react",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@pdftron/webviewer": "^8.7.0",
-    "@solana/spl-token-registry": "^0.2.4574",
-    "@solana/wallet-adapter-base": "^0.9.10",
-    "@solana/wallet-adapter-react": "^0.15.9",
-    "@solana/wallet-adapter-react-ui": "^0.9.12",
-    "@solana/wallet-adapter-wallets": "^0.17.1",
-    "@solana/web3.js": "^1.50.1",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "antd": "^4.22.3",
-    "axios": "^0.27.2",
-    "classnames": "^2.3.1",
-    "dva-core": "^2.0.4",
-    "fabric": "^5.2.1",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
-    "less": "^4.1.3",
-    "qs": "^6.11.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-pdf": "^5.7.2",
-    "react-redux": "^8.0.2",
-    "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
-    "react-sketch-canvas": "^6.2.0",
-    "redux": "^4.2.0",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+    "name": "solana-sign-react",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@solana/spl-token-registry": "^0.2.4574",
+        "@solana/wallet-adapter-base": "^0.9.16",
+        "@solana/wallet-adapter-phantom": "^0.9.14",
+        "@solana/wallet-adapter-react": "^0.15.18",
+        "@solana/wallet-adapter-react-ui": "^0.9.16",
+        "@solana/wallet-adapter-wallets": "^0.17.2",
+        "@solana/web3.js": "^1.50.1",
+        "@testing-library/jest-dom": "^5.16.5",
+        "@testing-library/react": "^13.3.0",
+        "@testing-library/user-event": "^13.5.0",
+        "antd": "^4.22.3",
+        "axios": "^0.27.2",
+        "bs58": "^5.0.0",
+        "buffer": "^6.0.3",
+        "classnames": "^2.3.1",
+        "crypto-browserify": "^3.12.0",
+        "dva-core": "^2.0.4",
+        "fabric": "^5.2.1",
+        "html2canvas": "^1.4.1",
+        "jotai": "^1.8.0",
+        "jspdf": "^2.5.1",
+        "less": "^4.1.3",
+        "moveable": "^0.35.4",
+        "pdf-merger-js": "^4.1.0",
+        "qs": "^6.11.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-moveable": "^0.38.4",
+        "react-pdf": "^5.7.2",
+        "react-redux": "^8.0.2",
+        "react-router-dom": "^6.3.0",
+        "react-scripts": "5.0.1",
+        "redux": "^4.2.0",
+        "web-vitals": "^2.1.4"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+    "main": "index.js",
+    "author": "",
+    "license": "ISC"
 }

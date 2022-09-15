@@ -1,3 +1,123 @@
 .create-container {
     width: 100%;
 }
+
+.title {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 600;
+}
+
+.upload-button {
+    cursor: pointer;
+    width: 90px;
+    height: 40px;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 14px;
+    color: aliceblue;
+    text-align: center;
+    line-height: 40px;
+    background-color: rgb(211, 140, 80);
+}
+
+.divide {
+    height: 2px;
+    width: calc(100% - 200px);
+    background-color: #00968836;
+    border-radius: 1px;
+    margin: 20px 0;
+}
+
+.action-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+input[type="file"] {
+    /* visibility: hidden; */
+    display: none;
+}
+
+.dragger-box {
+    cursor: grab;
+    margin: 20px;
+    background: rgb(253 247 243);
+    height: 200px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #b5b5b5;
+}
+
+.uploaded-item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 220px;
+    width: calc(50% - 40px);
+    height: 100px;
+    padding: 24px;
+    margin: 20px;
+    border-radius: 10px;
+    background-color: #dcf5e2;
+    border: solid 1px rgb(235 236 239);
+}
+
+.uploaded-item .name {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Circular-Book", sans-serif;
+}
+
+.uploaded-item .desc span {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(110 113 121);
+    margin-right: 10px;
+}
+
+.uploaded-box {
+    display: flex;
+    justify-content: space-between;
+}
+
+.items-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.delete-icon:hover {
+    color: red;
+}
+
+iframe {
+    border: none;
+    margin: 20px;
+    position: sticky;
+    top: 20px;
+    border: 1px solid #b5b5b5;
+    border-radius: 10px;
+}
+
+.preview-tip {
+    width: 300px;
+    flex-shrink: 0;
+    height: 400px;
+    line-height: 400px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: rgb(110 113 121);
+    background-color: #fff;
+    border: 1px solid #b5b5b5;
+    border-radius: 10px;
+    margin: 20px;
+    position: sticky;
+    top: 20px;
+}

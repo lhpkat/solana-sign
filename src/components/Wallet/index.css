@@ -1,6 +1,7 @@
 .wallet-contain {
     display: flex;
     flex-direction: column;
+    min-width: 180px;
 }
 
 .user-box {

@@ -1,0 +1,10 @@
+.file-box {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.file-item {
+    width: 200px;
+    height: 100px;
+    background-color: antiquewhite;
+}

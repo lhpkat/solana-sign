@@ -88,7 +88,8 @@ const useUserInfo = () => {
   return ({
       tokens,
       userInfo,
-      myTokens
+      myTokens,
+      handleLogout
   })
 }
 

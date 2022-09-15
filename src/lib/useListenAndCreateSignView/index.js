@@ -24,8 +24,10 @@ const useListenAndCreateSignView = (ChildrenDom, canClickDown = true, callback) 
         return (
             <div id="dom-box"
                 style={{
-                    top: screenY - 75,
-                    left: screenX - 100
+                    // top: screenY - 75,
+                    // left: screenX - 100,
+                    top: screenY + 5,
+                    left: screenX + 5
                 }}
             >
                 {
@@ -62,13 +64,8 @@ const useListenAndCreateSignView = (ChildrenDom, canClickDown = true, callback) 
         }
     }, [])
 
-    const starter = (event) => {
-        console.log('000000');
+    const starter = () => {
         if (ChildrenDom) {
-            setLocation({
-                screenX: event?.screenX || 0,
-                screenY: event?.screenY || 0
-            });
             setSuccess(false);
             setShowChildren(true);
             document.addEventListener('mousemove', listenMouseMove);

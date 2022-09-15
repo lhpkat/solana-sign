@@ -4,7 +4,8 @@ import usehtmlToPdf, {
     canvasToPdf,
     downPdf,
 } from './usehtmlToPdf';
-import useListenAndCreateSignView from './useListenAndCreateSignView'
+import useListenAndCreateSignView from './useListenAndCreateSignView';
+import * as aboutSolanaWeb3 from './transaction';
 
 const bindPushState = () => {
     const bindEventListener = function (type) {
@@ -27,5 +28,6 @@ export {
     getCanvasByDom,
     canvasToPdf,
     downPdf,
-    useListenAndCreateSignView
+    useListenAndCreateSignView,
+    aboutSolanaWeb3,
 };

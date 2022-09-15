@@ -14,7 +14,7 @@ const PageFooter = () => {
         0: '/',
         1: '/create',
         2: '/recipients',
-        3: 'prepare-document',
+        3: '/prepare-document',
         4: '/review'
     }
     const location = useLocation();

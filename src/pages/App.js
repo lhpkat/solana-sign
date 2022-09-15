@@ -28,15 +28,15 @@ const App = ({ dispatch }) => {
           <SiderContain />
         </Sider>
         <Layout>
-          <Content>
+          <Content className="layout-content">
             <Routes />
           </Content>
-          <Footer>
+          {/* <Footer>
             {
               location.pathname !== '/' &&
               <PageFooter />
             }
-          </Footer>
+          </Footer> */}
         </Layout>
       </Layout>
     </div>

@@ -1,0 +1,31 @@
+.title {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 600;
+    margin: 10px 0 10px;
+}
+
+.sub-title {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    margin: 10px 0 10px;
+}
+
+.signers-box {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.signers-box>div {
+    width: 200px;
+    height: 100px;
+    border-radius: 10px;
+    background-color: white;
+    margin: 10px 20px;
+    padding: 14px 20px;
+    display: flex;
+    border: 1px solid rgb(235 236 239);
+    flex-direction: column;
+    justify-content: space-evenly;
+}

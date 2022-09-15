@@ -1,0 +1,94 @@
+.add-myself {
+    cursor: pointer;
+    padding: 10px 20px;
+    width: 150px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #c1b2b2;
+    color: #c1b2b2;
+    margin: 40px 0 20px;
+}
+
+.add-myself:hover {
+    border: 2px solid #1a1010;
+    color: #1a1010;
+}
+
+.manage-recipients {
+    margin: 0 0 40px;
+}
+
+.father-box {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.signers-or-viewers-box {
+    width: 100%;
+}
+
+.signers-or-viewers-title {
+    font-weight: 600;
+    position: relative;
+}
+
+.signers-or-viewers-title::after {
+    content: '';
+    position: absolute;
+    width: calc(100% - 70px);
+    top: 50%;
+    left: 50px;
+    height: 2px;
+    background-color: rgb(206 209 217);
+}
+
+.placehold {
+    width: 100%;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}
+
+.items-box {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.item-box {
+    height: 90px;
+    width: 230px;
+    background: white;
+    padding: 15px 20px;
+    margin: 20px;
+    border-radius: 10px;
+    border: 1px solid aquamarine;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-box-right {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.delete-icon:hover {
+    color: red;
+}
+
+.select-orign {
+    padding: 2px 5px;
+    border: 1px solid #c1b2b2;
+    width: 80px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}

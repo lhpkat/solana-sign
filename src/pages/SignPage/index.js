@@ -15,7 +15,7 @@ import PDFMerger from 'pdf-merger-js/browser';
 import { Buffer } from 'buffer';
 import { fabric } from "fabric";
 import { useAtomValue, useSetAtom } from 'jotai';
-import { fileListAtom, signersAtom, signGroupInfoAtom, pdfFileAtom } from '../../store';
+import { fileListAtom, signersAtom, signGroupInfoAtom } from '../../store';
 import {
     getCanvasByDom,
     canvasToPdf,
@@ -28,7 +28,7 @@ import './index.css';
 const { Option } = Select;
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
-const PrepareDocument = (props) => {
+const SignPage = () => {
     const canvasBoxWrap = useRef({});
     const [numPages, setNumPages] = useState(0);
     const startListen = useRef(false);
@@ -39,10 +39,9 @@ const PrepareDocument = (props) => {
     const fileList = useAtomValue(fileListAtom);
     const setSignGroupInfo = useSetAtom(signGroupInfoAtom);
     const [pdfMetaData, setPdfMetaData] = useState([]);
-    const setPdfFile = useSetAtom(pdfFileAtom);
 
     const [info, setInfo] = useState([]);
-    console.log({props});
+
     const signType = [
         {
             name: "Don't specify",
@@ -143,7 +142,7 @@ const PrepareDocument = (props) => {
             lockRotation: true,
             rotatingPointOffset: false,
         });
-        console.log({group});
+
         setInfo(info => ([
             ...info,
             {
@@ -174,26 +173,26 @@ const PrepareDocument = (props) => {
     };
 
     const save = async () => {
-        // const allCanvas = await getAllPdfCanvas();
-        // const doc = new jsPDF();
+        const allCanvas = await getAllPdfCanvas();
+        const doc = new jsPDF();
 
-        // allCanvas.forEach((canvas, index) => {
-        //     const image = canvas.toDataURL("image/jpeg", 1.0);
+        allCanvas.forEach((canvas, index) => {
+            const image = canvas.toDataURL("image/jpeg", 1.0);
 
-        //     // canvasToPdf(image, doc);
-        //     if (index === 0) {
-        //         doc.addImage(image, "JPEG", 0, 0, 210, 300);
-        //     } else {
-        //         doc.addPage();
-        //         doc.addImage(image, "JPEG", 0, 0, 210, 300);
-        //     }
+            // canvasToPdf(image, doc);
+            if (index === 0) {
+                doc.addImage(image, "JPEG", 0, 0, 210, 300);
+            } else {
+                doc.addPage();
+                doc.addImage(image, "JPEG", 0, 0, 210, 300);
+            }
 
-        //     // // 设置透明度.
-        //     // doc.saveGraphicsState();
-        //     // doc.setGState(new doc.GState({ opacity: 0.2 }));
-        //     // doc.restoreGraphicsState();
-        // });
-        console.log({info});
+            // // 设置透明度.
+            // doc.saveGraphicsState();
+            // doc.setGState(new doc.GState({ opacity: 0.2 }));
+            // doc.restoreGraphicsState();
+        });
+
         setSignGroupInfo(info.slice().map(item => ({
             address: item.address,
             page: item.page,
@@ -218,11 +217,11 @@ const PrepareDocument = (props) => {
     const mergePdf = async (data) => {
         if (!data?.length) return;
 
-        // if (data.length <= 1) {
-        //     const url = URL.createObjectURL(data[0]);
-        //     setPdfMetaData(url);
-        //     return;
-        // }
+        if (data.length <= 1) {
+            const url = URL.createObjectURL(data[0]);
+            setPdfMetaData(url);
+            return;
+        }
 
         window.Buffer = Buffer;
         const merger = new PDFMerger();
@@ -232,12 +231,6 @@ const PrepareDocument = (props) => {
         }
 
         const mergedPdf = await merger.saveAsBlob();
-
-        setPdfFile({
-            blob: mergedPdf,
-            name: data[0].name.replace(".pdf", "")
-        });
-
         const url = URL.createObjectURL(mergedPdf);
         setPdfMetaData(url);
     }
@@ -378,4 +371,4 @@ const PrepareDocument = (props) => {
     )
 }
 
-export default PrepareDocument;
+export default SignPage;
