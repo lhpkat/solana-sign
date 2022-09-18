@@ -14,7 +14,7 @@ const Index = () => {
         { path: "create", element: <Create /> },
         { path: "recipients", element: <Recipients /> },
         { path: "prepare-document", element: <PrepareDocument /> },
-        { path: "signPage", element: <SignPage /> },
+        { path: "signPage/:id", element: <SignPage /> },
         { path: "review", element: <Review /> },
         { path: "test", element: <Test /> },
     ]);

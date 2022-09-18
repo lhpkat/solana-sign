@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Button, message, Typography } from 'antd';
+import { message, Typography } from 'antd';
+import Button from '@mui/material/Button';
 import { CopyOutlined } from '@ant-design/icons';
 import { TokenListProvider } from '@solana/spl-token-registry'
 import { Connection, PublicKey, clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js'
@@ -80,9 +81,6 @@ const Wallet = () => {
     const connectPhantomWallet = async() => {
         const wallet = aboutSolanaWeb3.wallets.Phantom.getAdapter();
         await wallet.connect();
-
-        const owner = wallet.publicKey.toString();
-        console.log('wallet', { wallet, owner });
     }
 
     useEffect(() => {
@@ -93,7 +91,7 @@ const Wallet = () => {
         <div className="wallet-contain">
             {
                 !currentUser
-                ? <Button onClick={connectWallet}>
+                ? <Button  variant="contained" onClick={connectWallet}>
                     登录
                 </Button>
                 : <>
@@ -101,7 +99,7 @@ const Wallet = () => {
                         { handleSubString(currentUser) }
                         <CopyOutlined onClick={ () => { paste(currentUser) } }/>
                     </div>
-                    <Button onClick={ disconnect }>
+                    <Button  variant="contained" onClick={ disconnect }>
                         退出
                     </Button>
                 </>

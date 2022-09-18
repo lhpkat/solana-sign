@@ -11,6 +11,11 @@
     align-items: center;
 }
 
+img {
+    margin: 0 20px 30px;
+    border-radius: 10px;
+}
+
 .jump-to-create-box {
     width: 150px;
     height: 100px;
@@ -18,15 +23,11 @@
     background-color: rgb(253 247 243);
     align-items: center;
     justify-content: center;
-    margin: 0 auto 30px;
-    border-radius: 15px;
+    margin: 0 auto 30px !important;
+    border-radius: 15px !important;
 }
 
 .jump-to-create-box svg {
     font-size: 40px;
     margin-left: 10px;
-}
-
-.jump-to-create-box:hover {
-    background-color: rgb(164, 75, 15);
 }

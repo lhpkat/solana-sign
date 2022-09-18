@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from 'antd';
+// import { Button } from 'antd';
+import Button from '@mui/material/Button';
 import { useLocation, Link } from "react-router-dom";
 import './index.css'
 
@@ -29,10 +30,10 @@ const PageFooter = () => {
     return (
         <div className='page-footer-box'>
             <Link to={`${pathToStep[step - 1] || '/'}`}>
-                <Button>返回上一步</Button>
+                <Button  variant="contained">返回上一步</Button>
             </Link>
             <Link to={`${pathToStep[step + 1] || '/'}`}>
-                <Button>下一步</Button>
+                <Button  variant="contained">下一步</Button>
             </Link>
         </div>
     )

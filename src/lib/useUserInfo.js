@@ -25,7 +25,6 @@ const useUserInfo = () => {
       }
 
       window.solana.connect({ onlyIfTrusted: true }).then(async ({ publicKey }) => {
-        console.log('publicKey', publicKey);
         init({ publicKey })
       })
     }, 100)
@@ -43,10 +42,6 @@ const useUserInfo = () => {
 
     const info = await connection.getBalance(pubKey);
 
-    console.log('info', info);
-
-    console.log('getTokenAccountsByOwner', getTokenAccountsByOwner);
-
     for (const token of getTokenAccountsByOwner.value) {
       const { mint: tokenAddress, tokenAmount } = token.account.data.parsed.info
       splTokens.push({ tokenAddress, balance: tokenAmount.uiAmountString })
@@ -58,7 +53,6 @@ const useUserInfo = () => {
 
   useEffect(() => {
     new TokenListProvider().resolve().then(tokens => {
-      console.log('tokens', tokens);
       const allToken = {}
       const tokenList = tokens.filterByClusterSlug(clusterSlug).getList()
 

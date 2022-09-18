@@ -48,13 +48,14 @@ const transferNativeSol = async ({
             toPubkey,
         }),
     );
+
     const transaction = new Transaction();
 
     instructions.forEach(instruction => {
         transaction.add(instruction);
     });
     transaction.recentBlockhash = (
-        await connection.getRecentBlockhash('max')
+        await connection.getLatestBlockhash('max')  
         // await createWeb3Connection().getRecentBlockhash('max')
     ).blockhash;
     transaction.feePayer = payerPublicKey;

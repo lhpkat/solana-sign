@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { Steps } from 'antd';
+import Button from '@mui/material/Button';
 import { PlusCircleTwoTone } from '@ant-design/icons';
 import Wallet from '../Wallet';
 import './index.css';
@@ -21,29 +22,28 @@ const SliderContain = () => {
 
     useEffect(() => {
         const { pathname = '' } = location;
-
+        console.log({location}, pathToStep[pathname]);
         setStep(pathToStep[pathname]);
     }, [location]);
 
     const CreatePageButton = () => { 
         return (
             <Link to='/create'>
-                <div className='jump-to-create-box'>
+                <Button variant="contained" className='jump-to-create-box'>
                     <span>上传合同</span>
                     <span>
                         <PlusCircleTwoTone />
                     </span>
-                </div>
+                </Button>
             </Link>
         )
     }
 
     return (
         <div className="slider-contain">
-            <img src="logo.svg" alt="" width="100" height="100"/>
-            {/* <img src="logo.png" alt="" width="100" height="100"/> */}
+            <img src="/favicon.svg" alt="" width="130" height="100"/>
             {
-                step === 0
+                (step <= 0 || !step)
                 ? <CreatePageButton />
                 : <Steps
                     className="steps-contain"

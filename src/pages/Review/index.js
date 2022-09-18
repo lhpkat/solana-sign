@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input } from 'antd';
+import { Input } from 'antd';
+import Button from '@mui/material/Button';
 import { Link } from "react-router-dom";
 import bs58 from "bs58";
 import { useAtomValue } from 'jotai';
+import { Keypair } from "@solana/web3.js";
 import {
     signersAtom,
     signGroupInfoAtom,
@@ -74,30 +76,24 @@ const Review = () => {
         // const res = await uploadPdf(data?.userInfo?.publicKey, fd);
         const res = await uploadPdf(currentUser, fd);
 
-        if (!res?.code) {
-            const decoded = bs58.decode(res?.data?.tx);
+        if (!res?.code && res.msg === "success") {
+            // const decoded = bs58.decode(res?.data?.tx);
             const wallet = aboutSolanaWeb3.wallets.Phantom.getAdapter();
             await wallet.connect();
+            const { solana = undefined } = window;
 
-            const transres = await transferNativeSol(
-                {
-                    payerPublicKey: window?.solana?.publicKey,
-                    toPubkey,
-                    amount: amount * 1e9,
-                    connection,
-                    wallet: solana,
-                },
-                res?.data?.file_address,
-                Number(res?.data?.pay_amount) * 1e9,
-                data?.userInfo?.publicKey,
-                createWeb3Connection,
-                wallet,
-            );
+            const hashRes = await transferNativeSol({
+                payerPublicKey: solana?.publicKey,
+                toPubkey: res?.data?.file_address,
+                amount: Number(res?.data?.pay_amount) * 1e9,
+                connection: createWeb3Connection(),
+                wallet: solana,
+            });
 
             await requestCreateSign({
-                user: data?.userInfo?.publicKey,
+                user: solana?.publicKey.toString(),
                 file_address: res?.data?.file_address,
-                hash: transres?.hash || transres?.result
+                hash: hashRes
             })
         }
     }
@@ -136,35 +132,11 @@ const Review = () => {
                     setContractName(e.target.value)
                 } }
             />
-            <Button onClick={ async () => {
-                const resp = await window.solana.connect();
-                // resp.publicKey.toString();
-                //连接了solana钱包，得到了钱包地址
-                console.log('resp.publicKey.toString() :',resp.publicKey.toString());
-
-                const wallet = aboutSolanaWeb3.wallets.Phantom.getAdapter();
-                await wallet.connect();
-                const web3 = createWeb3Connection()
-                await transferNativeSol(
-                    data?.userInfo?.publicKey,
-                    1 * 1e9,
-                    data?.userInfo?.publicKey,
-                    web3,
-                    wallet,
-                );
-            } }>
-                test
-            </Button>
             <footer>
-                <Link to={ {
-                    pathname: "/prepare-document",
-                    state: {
-                        test: '0'
-                    }
-                } }>
-                    <Button>上一步</Button>
+                <Link to="/prepare-document">
+                    <Button  variant="contained">上一步</Button>
                 </Link>
-                <Button onClick={ () => {
+                <Button  variant="contained" onClick={ () => {
                     handleSend();
                 } }>发送</Button>
             </footer>

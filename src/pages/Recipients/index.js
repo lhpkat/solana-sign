@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { Button, message, Input, Dropdown, Menu, Form } from 'antd';
+import { message, Input, Dropdown, Menu, Form } from 'antd';
+import Button from '@mui/material/Button';
 import { PlusCircleFilled, PlusOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons';
 import { useAtomValue, useAtom } from 'jotai';
 import {
@@ -206,10 +207,10 @@ const Recipients = () => {
             </div>
             <footer>
                 <Link to="/create">
-                    <Button>返回</Button>
+                    <Button  variant="contained">返回</Button>
                 </Link>
                 <Link to="/prepare-document">
-                    <Button>下一步</Button>
+                    <Button  variant="contained">下一步</Button>
                 </Link>
             </footer>
         </div>

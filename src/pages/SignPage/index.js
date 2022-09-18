@@ -1,5 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Button, message, Select } from 'antd';
+import { message, Select } from 'antd';
+import Button from '@mui/material/Button';
+import Modal from "./Modal";
 import {
     BorderOutlined,
     Loading3QuartersOutlined,
@@ -7,20 +9,17 @@ import {
     WalletOutlined,
     FontSizeOutlined,
 } from '@ant-design/icons';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import cx from "classnames";
 import { jsPDF } from "jspdf";
 import { Document, Page, pdfjs } from "react-pdf";
-import PDFMerger from 'pdf-merger-js/browser';
-import { Buffer } from 'buffer';
 import { fabric } from "fabric";
-import { useAtomValue, useSetAtom } from 'jotai';
-import { fileListAtom, signersAtom, signGroupInfoAtom } from '../../store';
+import { useAtomValue } from 'jotai';
+import { currentUserAtom, signersAtom } from '../../store';
 import {
     getCanvasByDom,
     canvasToPdf,
     downPdf,
-    useListenAndCreateSignView
 } from '../../lib';
 import './index.css';
 
@@ -31,35 +30,46 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/l
 const SignPage = () => {
     const canvasBoxWrap = useRef({});
     const [numPages, setNumPages] = useState(0);
-    const startListen = useRef(false);
-    const signers = useAtomValue(signersAtom);
-    const activeSigner = useRef('');
-    const activeSelectType = useRef('');
-    const activePageNumber = useRef(0);
-    const fileList = useAtomValue(fileListAtom);
-    const setSignGroupInfo = useSetAtom(signGroupInfoAtom);
-    const [pdfMetaData, setPdfMetaData] = useState([]);
+    const [data, setData] = useState({});
+    const currentUser = useAtomValue(currentUserAtom);
+    const location = useLocation();
+    const [open, setOpen] = useState(false);
 
-    const [info, setInfo] = useState([]);
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+    useEffect(() => {
+        setData(location.state?.info);
+    }, [location])
 
     const signType = [
         {
+            id: 0,
             name: "Don't specify",
             icon: <Loading3QuartersOutlined />
         },
         {
+            id: 1,
             name: "Data",
             icon: <CalendarOutlined />
         },
         {
+            id: 2,
             name: "CheckBox",
             icon: <BorderOutlined />
         },
         {
+            id: 3,
             name: "Wallet Address",
             icon: <WalletOutlined />
         },
         {
+            id: 4,
             name: "Text",
             icon: <FontSizeOutlined />
         }
@@ -68,90 +78,101 @@ const SignPage = () => {
     const SignDom = () => {
         return (
             <div className='sign-dom'>
-                { handleSubString(activeSigner.current) }
+                { handleSubString(currentUser) }
             </div>
         )
     }
-
-    const [starter, FloatModal, success] = useListenAndCreateSignView(SignDom, true, (e) => {
-        console.log('callback', e);
-    });
-
-    useEffect(() => {
-        console.log('success', success);
-    }, [success])
 
     const onDocumentLoadSuccess = ({ numPages: pages }) => {
         setNumPages(numPages => numPages + pages);
     };
 
-    const handleCanvasItemActionRenderer = (id, index) => {
+    const handleSignDomRenderer = (id, info) => {
         const canvas = new fabric.Canvas(id, {
             // position: 'absolute',
             // left: 0,
             // top: 0,
-            width: 500,
-            height: 647,
+            width: Math.ceil(info.pageWidth),
+            height: Math.ceil(info.pageHeight),
+            hasRotatingPoint: false,
+            hoverCursor: "pointer",
+            selection: false,
         });
+        console.log({info});
+        if (!!info.status) {
+            // 添加已签名图片
+            fabric.Image.fromURL(
+                info.raw,
+                (img) => {
+                    canvas.add(img.set({
+                        left: info.x,
+                        top: info.y,
+                        width: info.width,
+                        height: info.height,
+                        clipPath: new fabric.Circle({
+                            radius: 200,
+                            originX: 'center',
+                            originY: 'center'
+                        }),
+                        angle: 30
+                    }).scale(0.25));
 
-        // canvas.clear().renderAll();
-        canvas.on('mouse:down', function (options) {
-            if (!startListen.current) return;
-
-            startListen.current = false;
-            setTimeout(() => {
-                handleAddSignToCanvas(canvas, options);
-            }, 200)
-        });
+                    canvas.renderAll();
+                }, { crossOrigin: 'anonymous' }
+            );
+        } else {
+            handleAddSignToCanvas(canvas, {
+                width: info.width,
+                height: info.height,
+                x: info.x,
+                y: info.y,
+                address: info.address,
+                signType: info.sign_type,
+                raw: info.raw,
+                status: info.status
+            });
+        }
     }
 
-    const handleAddSignToCanvas = (fabricCanvas, options) => {
+    const handleAddSignToCanvas = (fabricCanvas, info) => {
         const rect = new fabric.Rect({
-            width: 200,
-            height: 150,
+            width: Math.ceil(info.width),
+            height: Math.ceil(info.height),
             fill: '#eaf1ff',
-            // borderColor: '#618cf9',
-            // hasBorders: false,
-            // hasControls: false,
-            // borderDashArray: ['dash'],
             opacity: 0.7,
             rx: 10,
             ry: 10,
             originX: 'center',
             originY: 'center',
         });
-        const text = new fabric.Text(handleSubString(activeSigner.current), {
+        const text = new fabric.Text(handleSubString(info.address), {
             fontSize: 20,
             fontWeight: 400,
             fontFamily: 'BlinkMacSystemFont',
             originX: 'center',
             originY: 'center',
         });
-        const text_desc = new fabric.Text("在此签名", {
+        const text_desc = new fabric.Text(`签名：${ handleSubString(info.address) }`, {
             fontSize: 12,
             color: '#e8e8e8',
-            left: 30,
+            left: 10,
             top: 50,
         });
         const group = new fabric.Group([rect, text, text_desc], {
-            width: 200,
-            height: 150,
-            left: options.e.offsetX,
-            top: options.e.offsetY,
-            hasRotatingPoint: false,
-            lockRotation: true,
-            rotatingPointOffset: false,
+            left: info.x,
+            top: info.y,
+            hasControls: false,
+            subTargetCheck: true,
+            lockMovementX: true,
+            lockMovementY: true,
         });
 
-        setInfo(info => ([
-            ...info,
-            {
-                group,
-                page: activePageNumber.current,
-                type: activeSelectType.current,
-                address: activeSigner.current
-            }
-        ]))
+        group.on('mousedown', function (options) {
+            if (!!info.status || info.address !== currentUser) return;
+
+            handleClickOpen();
+            console.log({ options, info });
+        });
 
         fabricCanvas.add(group);
     }
@@ -193,17 +214,7 @@ const SignPage = () => {
             // doc.restoreGraphicsState();
         });
 
-        setSignGroupInfo(info.slice().map(item => ({
-            address: item.address,
-            page: item.page,
-            type: item.type,
-            top: item.group.get("top"),
-            left: item.group.get("left"),
-            width: Math.floor(item.group.get("width") * item.group.get('scaleX').toFixed(2)),
-            height: Math.floor(item.group.get("height") * item.group.get('scaleY').toFixed(2)),
-        })))
-
-        // doc.save("test.pdf");
+        doc.save("test.pdf");
     }
 
     const handleSubString = (value) => {
@@ -212,41 +223,6 @@ const SignPage = () => {
                 ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
                 : value
         )
-    }
-
-    const mergePdf = async (data) => {
-        if (!data?.length) return;
-
-        if (data.length <= 1) {
-            const url = URL.createObjectURL(data[0]);
-            setPdfMetaData(url);
-            return;
-        }
-
-        window.Buffer = Buffer;
-        const merger = new PDFMerger();
-
-        for (const file of data) {
-            await merger.add(file)
-        }
-
-        const mergedPdf = await merger.saveAsBlob();
-        const url = URL.createObjectURL(mergedPdf);
-        setPdfMetaData(url);
-    }
-
-    const handleActiverChange = (value) => {
-        activeSigner.current = value;
-    }
-
-    const handleSelectTypeChange = (value) => {
-        if (!activeSigner.current) {
-            message.error("请选择一位签名者！");
-            return;
-        };
-        activeSelectType.current = value;
-        startListen.current = true;
-        starter();
     }
 
     const RenderPage = useMemo(() => {
@@ -263,8 +239,16 @@ const SignPage = () => {
                         className="page"
                         key={ `${i}-${t}` }
                         pageNumber={ i + 1 }
-                        onLoadSuccess={ ({ _pageIndex }) => {
-                            handleCanvasItemActionRenderer(`canvas-action-${_pageIndex}`, _pageIndex);
+                        onLoadSuccess={ ({ _pageIndex, height, width }) => {
+                            data.signers.forEach(item => {
+                                if (item.page === _pageIndex) {
+                                    handleSignDomRenderer(`canvas-action-${_pageIndex}`, {
+                                        pageHeight: height,
+                                        pageWidth: width,
+                                        ...item
+                                    });
+                                }
+                            })
                         } }
                         renderAnnotationLayer={ false }
                         renderTextLayer={ false }
@@ -273,11 +257,8 @@ const SignPage = () => {
                                 canvasBoxWrap.current[i] = ref;
                             }
                         } }
-                        onClick={ () => {
-                            activePageNumber.current = i + 1;
-                        } }
-                        // canvasRef={ (ref) => {
-                        //     ref.id = `canvas-action-${i}`
+                        // onClick={ () => {
+                        //     activePageNumber.current = i + 1;
                         // } }
                     >
                         <canvas
@@ -293,29 +274,18 @@ const SignPage = () => {
         return temp;
     }, [numPages]);
 
-    useEffect(() => {
-        const fileListArr = Object.values(fileList);
-        if (fileListArr?.length > 0) {
-            const fileList_ = Object.values(fileList).slice().map(item => {
-                return item.file
-            })
-    
-            mergePdf(fileList_).catch(e => {
-                console.error({
-                    source: 'pdf-merger-js/browser',
-                    error: e
-                });
-            });
-        }
-    }, [fileList])
-
     return (
         <div className="prepare-document-box">
-            <FloatModal />
+            <Modal
+                open={ open }
+                handleClose={ handleClose }
+            />
             <div className="canvas-panal">
                 <div className="doc-box">
                     <Document
-                        file={ pdfMetaData }
+                        // file={ data.url }
+                        // file="https://arweave.net/KoRjEpshjPZHnqVj4BB_DKimKXpa1nkGlrvpmtMTPeA"
+                        file="/init.pdf"
                         onLoadSuccess={onDocumentLoadSuccess}
                     >
                         { RenderPage }
@@ -323,48 +293,8 @@ const SignPage = () => {
                 </div>
             </div>
             <div className="action-panal">
-                <Button
-                    onClick={ save }
-                >保存</Button>
-                <div className="title">选择签名者</div>
-                <Select style={ { width: 240 } }
-                    onChange={ handleActiverChange }
-                >
-                    {
-                        Object.values(signers).map(item => (
-                            <Option
-                                value={ item }
-                                key={ item }
-                            >{ handleSubString(item) }</Option>
-                        ))
-                    }
-                </Select>
-                <div className="divide" />
-                <div className="title">选择签名类型</div>
-                <Select style={ { width: 240 } }
-                    onSelect={ handleSelectTypeChange }
-                >
-                    {
-                        signType.map(item => (
-                            <Option value={ item.name }
-                                key={ item.name }
-                            >
-                                { item.icon }
-                                <span className='option-type-name'>
-                                    { item.name }
-                                </span>
-                            </Option>
-                        ))
-                    }
-                </Select>
-
                 <footer>
-                    <Link to="/recipients">
-                        <Button>返回上一步</Button>
-                    </Link>
-                    <Link to="/review">
-                        <Button>下一步</Button>
-                    </Link>
+                    <Button variant="contained">完成</Button>
                 </footer>
             </div>
         </div>

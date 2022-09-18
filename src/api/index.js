@@ -1,19 +1,20 @@
 import axios from 'axios';
 import qs from 'qs';
 
-const baseUrl = "https://6772-125-68-117-33.ap.ngrok.io";
 
-const get = async(url, params, takeControl) => {
+const baseUrl = "http://124.220.51.86/api";
+
+const get = async (url, params, takeControl) => {
     return axios.get(url, {
-      withCredentials: true,
-      params,
-      headers: {
-        'content-type': 'application/json',
-        'accept': 'application/json'
-      },
-      paramsSerializer: function (params) {
-        return qs.stringify(params, {arrayFormat: 'brackets'})
-      },
+        withCredentials: false,
+        params,
+        headers: {
+            'content-type': 'application/json',
+            'accept': 'application/json'
+        },
+        paramsSerializer: function (params) {
+        return qs.stringify(params, { arrayFormat: 'brackets' })
+        },
     })
     .then((res) => {
         if (takeControl) {
@@ -30,9 +31,13 @@ const post = async (url, data, takeControl) => {
         preload = qs.stringify(data)
     }
 
-    return axios.post(url, preload, {
-        withCredentials: true,
-    }).then((res) => {
+    return axios.post(
+        url,
+        preload,
+        {
+            withCredentials: false,
+        }
+    ).then((res) => {
         if (takeControl) {
             return res
         }

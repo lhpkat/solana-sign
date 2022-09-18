@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Button, message, Select } from 'antd';
+import { message, Select } from 'antd';
+import Button from '@mui/material/Button';
 import {
     BorderOutlined,
     Loading3QuartersOutlined,
@@ -28,8 +29,7 @@ import './index.css';
 const { Option } = Select;
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
-const PrepareDocument = (props) => {
-    const canvasBoxWrap = useRef({});
+const PrepareDocument = () => {
     const [numPages, setNumPages] = useState(0);
     const startListen = useRef(false);
     const signers = useAtomValue(signersAtom);
@@ -40,27 +40,31 @@ const PrepareDocument = (props) => {
     const setSignGroupInfo = useSetAtom(signGroupInfoAtom);
     const [pdfMetaData, setPdfMetaData] = useState([]);
     const setPdfFile = useSetAtom(pdfFileAtom);
-
     const [info, setInfo] = useState([]);
-    console.log({props});
+
     const signType = [
         {
+            id: 0,
             name: "Don't specify",
             icon: <Loading3QuartersOutlined />
         },
         {
+            id: 1,
             name: "Data",
             icon: <CalendarOutlined />
         },
         {
+            id: 2,
             name: "CheckBox",
             icon: <BorderOutlined />
         },
         {
+            id: 3,
             name: "Wallet Address",
             icon: <WalletOutlined />
         },
         {
+            id: 4,
             name: "Text",
             icon: <FontSizeOutlined />
         }
@@ -86,13 +90,10 @@ const PrepareDocument = (props) => {
         setNumPages(numPages => numPages + pages);
     };
 
-    const handleCanvasItemActionRenderer = (id, index) => {
+    const handleCanvasItemActionRenderer = (id, info) => {
         const canvas = new fabric.Canvas(id, {
-            // position: 'absolute',
-            // left: 0,
-            // top: 0,
-            width: 500,
-            height: 647,
+            width: info.pageWidth,
+            height: info.pageHeight,
         });
 
         // canvas.clear().renderAll();
@@ -111,10 +112,6 @@ const PrepareDocument = (props) => {
             width: 200,
             height: 150,
             fill: '#eaf1ff',
-            // borderColor: '#618cf9',
-            // hasBorders: false,
-            // hasControls: false,
-            // borderDashArray: ['dash'],
             opacity: 0.7,
             rx: 10,
             ry: 10,
@@ -143,7 +140,7 @@ const PrepareDocument = (props) => {
             lockRotation: true,
             rotatingPointOffset: false,
         });
-        console.log({group});
+
         setInfo(info => ([
             ...info,
             {
@@ -157,43 +154,7 @@ const PrepareDocument = (props) => {
         fabricCanvas.add(group);
     }
 
-    const getAllPdfCanvas = async () => {
-        const box = [];
-
-        if (canvasBoxWrap.current) {
-            const canvasBoxWrapArr = Object.values(canvasBoxWrap.current);
-            const length = canvasBoxWrapArr.length;
-
-            for (let i = 0; i < length; i += 1) {
-                box.push(getCanvasByDom(canvasBoxWrapArr[i]));
-            }
-        }
-
-        const allCanvas = await Promise.all(box);
-        return allCanvas;
-    };
-
-    const save = async () => {
-        // const allCanvas = await getAllPdfCanvas();
-        // const doc = new jsPDF();
-
-        // allCanvas.forEach((canvas, index) => {
-        //     const image = canvas.toDataURL("image/jpeg", 1.0);
-
-        //     // canvasToPdf(image, doc);
-        //     if (index === 0) {
-        //         doc.addImage(image, "JPEG", 0, 0, 210, 300);
-        //     } else {
-        //         doc.addPage();
-        //         doc.addImage(image, "JPEG", 0, 0, 210, 300);
-        //     }
-
-        //     // // 设置透明度.
-        //     // doc.saveGraphicsState();
-        //     // doc.setGState(new doc.GState({ opacity: 0.2 }));
-        //     // doc.restoreGraphicsState();
-        // });
-        console.log({info});
+    const saveSignInfo = () => {
         setSignGroupInfo(info.slice().map(item => ({
             address: item.address,
             page: item.page,
@@ -203,8 +164,6 @@ const PrepareDocument = (props) => {
             width: Math.floor(item.group.get("width") * item.group.get('scaleX').toFixed(2)),
             height: Math.floor(item.group.get("height") * item.group.get('scaleY').toFixed(2)),
         })))
-
-        // doc.save("test.pdf");
     }
 
     const handleSubString = (value) => {
@@ -217,12 +176,6 @@ const PrepareDocument = (props) => {
 
     const mergePdf = async (data) => {
         if (!data?.length) return;
-
-        // if (data.length <= 1) {
-        //     const url = URL.createObjectURL(data[0]);
-        //     setPdfMetaData(url);
-        //     return;
-        // }
 
         window.Buffer = Buffer;
         const merger = new PDFMerger();
@@ -251,6 +204,7 @@ const PrepareDocument = (props) => {
             message.error("请选择一位签名者！");
             return;
         };
+
         activeSelectType.current = value;
         startListen.current = true;
         starter();
@@ -261,8 +215,6 @@ const PrepareDocument = (props) => {
         const t = Date.now();
 
         if (numPages) {
-            canvasBoxWrap.current = {};
-
             for (let i = 0; i < +numPages; i += 1) {
                 temp.push(
                     <Page
@@ -270,22 +222,17 @@ const PrepareDocument = (props) => {
                         className="page"
                         key={ `${i}-${t}` }
                         pageNumber={ i + 1 }
-                        onLoadSuccess={ ({ _pageIndex }) => {
-                            handleCanvasItemActionRenderer(`canvas-action-${_pageIndex}`, _pageIndex);
+                        onLoadSuccess={ ({ _pageIndex, width, height }) => {
+                            handleCanvasItemActionRenderer(`canvas-action-${_pageIndex}`, {
+                                pageWidth: width,
+                                pageHeight: height
+                            });
                         } }
                         renderAnnotationLayer={ false }
                         renderTextLayer={ false }
-                        inputRef={ (ref) => {
-                            if (ref) {
-                                canvasBoxWrap.current[i] = ref;
-                            }
-                        } }
                         onClick={ () => {
-                            activePageNumber.current = i + 1;
+                            activePageNumber.current = i;
                         } }
-                        // canvasRef={ (ref) => {
-                        //     ref.id = `canvas-action-${i}`
-                        // } }
                     >
                         <canvas
                             width="500"
@@ -302,6 +249,7 @@ const PrepareDocument = (props) => {
 
     useEffect(() => {
         const fileListArr = Object.values(fileList);
+
         if (fileListArr?.length > 0) {
             const fileList_ = Object.values(fileList).slice().map(item => {
                 return item.file
@@ -315,6 +263,12 @@ const PrepareDocument = (props) => {
             });
         }
     }, [fileList])
+
+    useEffect(() => {
+        return (() => {
+            saveSignInfo();
+        })
+    }, [info])
 
     return (
         <div className="prepare-document-box">
@@ -330,9 +284,6 @@ const PrepareDocument = (props) => {
                 </div>
             </div>
             <div className="action-panal">
-                <Button
-                    onClick={ save }
-                >保存</Button>
                 <div className="title">选择签名者</div>
                 <Select style={ { width: 240 } }
                     onChange={ handleActiverChange }
@@ -353,7 +304,8 @@ const PrepareDocument = (props) => {
                 >
                     {
                         signType.map(item => (
-                            <Option value={ item.name }
+                            <Option
+                                value={ item.id }
                                 key={ item.name }
                             >
                                 { item.icon }
@@ -367,10 +319,10 @@ const PrepareDocument = (props) => {
 
                 <footer>
                     <Link to="/recipients">
-                        <Button>返回上一步</Button>
+                        <Button  variant="contained">返回上一步</Button>
                     </Link>
                     <Link to="/review">
-                        <Button>下一步</Button>
+                        <Button  variant="contained">下一步</Button>
                     </Link>
                 </footer>
             </div>

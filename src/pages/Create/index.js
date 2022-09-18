@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { DeleteOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+// import { Button } from 'antd';
+import Button from '@mui/material/Button';
 import { Link } from "react-router-dom";
 import { pdfjs } from "react-pdf";
 import { useAtom } from 'jotai';
@@ -129,10 +130,10 @@ const Create = () => {
                     }
                     <div>
                         <Link to="/">
-                            <Button>返回</Button>
+                            <Button  variant="contained">返回</Button>
                         </Link>
                         <Link to="/recipients">
-                            <Button>下一步</Button>
+                            <Button  variant="contained">下一步</Button>
                         </Link>
                     </div>
                 </div>
