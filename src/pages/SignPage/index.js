@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { message, Select } from 'antd';
 import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import Modal from "./Modal";
 import {
     BorderOutlined,
@@ -8,6 +9,7 @@ import {
     CalendarOutlined,
     WalletOutlined,
     FontSizeOutlined,
+    CheckSquareTwoTone
 } from '@ant-design/icons';
 import { Link, useLocation } from "react-router-dom";
 import cx from "classnames";
@@ -21,10 +23,10 @@ import {
     canvasToPdf,
     downPdf,
 } from '../../lib';
+import { fetchToSign } from "../../api";
 import './index.css';
 
 
-const { Option } = Select;
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
 const SignPage = () => {
@@ -34,46 +36,63 @@ const SignPage = () => {
     const currentUser = useAtomValue(currentUserAtom);
     const location = useLocation();
     const [open, setOpen] = useState(false);
+    const [openType, setOpenType] = useState(0);
+    const [activeGroup, setActiveGroup] = useState();
+    const [needSignGroup, setNeedSignGroup] = useState([]);
+    const [openTip, setOpenTip] = useState(false);
 
-    const handleClickOpen = () => {
-      setOpen(true);
+    const handleClickOpen = (type) => {
+        setOpen(true);
+        setOpenType(type);
     };
 
     const handleClose = () => {
-      setOpen(false);
+        setOpen(false);
+        setOpenType(0);
     };
 
     useEffect(() => {
-        setData(location.state?.info);
+        setData({
+            ...location.state?.info,
+            signers: location.state?.info?.signers.map((item, index) => ({
+                ...item,
+                id: index
+            }))
+        });
     }, [location])
 
     const signType = [
         {
             id: 0,
             name: "Don't specify",
-            icon: <Loading3QuartersOutlined />
+            zhName: "签名",
+            icon: <Loading3QuartersOutlined />,
         },
         {
             id: 1,
             name: "Data",
-            icon: <CalendarOutlined />
+            zhName: "日期",
+            icon: <CalendarOutlined />,
         },
         {
             id: 2,
             name: "CheckBox",
-            icon: <BorderOutlined />
+            zhName: "多选框",
+            icon: <BorderOutlined />,
         },
         {
             id: 3,
             name: "Wallet Address",
-            icon: <WalletOutlined />
+            zhName: "钱包地址",
+            icon: <WalletOutlined />,
         },
         {
             id: 4,
             name: "Text",
-            icon: <FontSizeOutlined />
+            zhName: "文本",
+            icon: <FontSizeOutlined />,
         }
-    ];
+    ]
 
     const SignDom = () => {
         return (
@@ -98,7 +117,7 @@ const SignPage = () => {
             hoverCursor: "pointer",
             selection: false,
         });
-        console.log({info});
+
         if (!!info.status) {
             // 添加已签名图片
             fabric.Image.fromURL(
@@ -129,52 +148,173 @@ const SignPage = () => {
                 address: info.address,
                 signType: info.sign_type,
                 raw: info.raw,
-                status: info.status
+                status: info.status,
+                id: info?.id,
             });
         }
     }
 
-    const handleAddSignToCanvas = (fabricCanvas, info) => {
+    const handleAddSignToCanvas = (fabricCanvas, info, expends) => {
         const rect = new fabric.Rect({
             width: Math.ceil(info.width),
             height: Math.ceil(info.height),
-            fill: '#eaf1ff',
-            opacity: 0.7,
+            fill: '#e8e8e8',
+            // fill: '#fff',
+            opacity: 0.5,
             rx: 10,
             ry: 10,
             originX: 'center',
             originY: 'center',
         });
-        const text = new fabric.Text(handleSubString(info.address), {
-            fontSize: 20,
-            fontWeight: 400,
-            fontFamily: 'BlinkMacSystemFont',
-            originX: 'center',
-            originY: 'center',
-        });
-        const text_desc = new fabric.Text(`签名：${ handleSubString(info.address) }`, {
-            fontSize: 12,
+        let mainInfo;
+
+        if (!!expends) {
+            switch (expends.type) {
+                case "text":
+                    mainInfo = new fabric.Text(handleSubString(expends.data, 20), {
+                        fontSize: 16,
+                        fontWeight: 400,
+                        fontFamily: 'BlinkMacSystemFont',
+                        originX: 'center',
+                        originY: 'center',
+                    });
+                    break;
+
+                case "img":
+                    fabric.Image.fromURL(expends.data, (img) => {
+                        mainInfo = img.set({
+                            originX: 'center',
+                            originY: 'center',
+                        }).scale(0.4);
+                    });
+                    break;
+
+                case "checkBox":
+                    mainInfo = new fabric.Image(expends.data, {
+                        originX: 'center',
+                        originY: 'center',
+                        opacity: 0.8,
+                    });
+                    break;
+
+                default:
+                    break;
+            }
+        } else {
+            mainInfo = new fabric.Text(
+                signType[signType.findIndex(item => (item.id === info.signType || item.name === info.signType))].zhName,
+                {
+                    fontSize: 20,
+                    fontWeight: 400,
+                    fontFamily: 'BlinkMacSystemFont',
+                    originX: 'center',
+                    originY: 'center',
+                }
+            );
+        }
+        const desc = new fabric.Text(`签名：${ handleSubString(info.address) }`, {
+            fontSize: 8,
             color: '#e8e8e8',
-            left: 10,
-            top: 50,
-        });
-        const group = new fabric.Group([rect, text, text_desc], {
-            left: info.x,
-            top: info.y,
-            hasControls: false,
-            subTargetCheck: true,
-            lockMovementX: true,
-            lockMovementY: true,
+            left: 95,
+            top: 65,
+            originX: 'right',
+            originY: 'bottom',
+            // originX: 'center',
+            // originY: 'center',
         });
 
-        group.on('mousedown', function (options) {
-            if (!!info.status || info.address !== currentUser) return;
+        setTimeout(() => {
+            const group = new fabric.Group([rect, mainInfo, desc], {
+                // width: Math.ceil(info.width),
+                // height: Math.ceil(info.height),
+                left: info.x,
+                top: info.y,
+                hasControls: false,
+                // subTargetCheck: true,
+                lockMovementX: true,
+                lockMovementY: true,
+                hasBorders: false
+            });
+    
+            group.on('mousedown', function (options) {
+                if (!!info.status || info.address !== currentUser) return;
+    
+                handleClickOpen(info.signType);
+                setActiveGroup({
+                    canvas: fabricCanvas,
+                    group,
+                    id: info.id,
+                });
+            });
+    
+            fabricCanvas.add(group);
 
-            handleClickOpen();
-            console.log({ options, info });
-        });
+            if (info.address === currentUser) {
+                if (!expends) {
+                    setNeedSignGroup((prev) => ([...prev, info]));
+                } else {
+                    setNeedSignGroup((prev) => {
+                        return (
+                            prev.slice().map(item => {
+                                if (item.id === info.id) {
+                                    return ({
+                                        ...item,
+                                        raw: group.toDataURL({
+                                            format: "jpeg",
+                                            quality: 1
+                                        })
+                                    })
+                                } else {
+                                    return item;
+                                }
+                            })
+                        )
+                    });
+                }
+            }
+        }, 100)
 
-        fabricCanvas.add(group);
+    }
+
+    const handleSign = (type, info) => {
+        activeGroup.canvas.remove(activeGroup.group);
+
+        const preSignData = data.signers.filter(item => item.id === activeGroup.id)[0];
+
+        switch (type) {
+            case 0:
+                handleAddSignToCanvas(activeGroup.canvas, {
+                    ...preSignData,
+                    signType: preSignData.sign_type,
+                }, {
+                    type: "img",
+                    data: info
+                });
+                break;
+
+            case 2:
+                handleAddSignToCanvas(activeGroup.canvas, {
+                    ...preSignData,
+                    signType: preSignData.sign_type,
+                }, {
+                    type: "checkBox",
+                    data: info
+                });
+                break;
+
+            case 1:
+            case 3:
+            case 4:
+            default:
+                handleAddSignToCanvas(activeGroup.canvas, {
+                    ...preSignData,
+                    signType: preSignData.sign_type,
+                }, {
+                    type: "text",
+                    data: info
+                });
+                break;
+        }
     }
 
     const getAllPdfCanvas = async () => {
@@ -217,11 +357,28 @@ const SignPage = () => {
         doc.save("test.pdf");
     }
 
-    const handleSubString = (value) => {
+    const handleCompleteSign = () => {
+        const filterData = needSignGroup.filter(item => !!item.raw);
+
+        if (!filterData.length) {
+            setOpenTip(true);
+        } else {
+            filterData.forEach(item => {
+                fetchToSign({
+                    ...item,
+                    sign_raw: item.raw,
+                    id: data.id,
+                    address: currentUser
+                })
+            })
+        }
+    }
+
+    const handleSubString = (value, need) => {
         return (
-            value.length > 12
-                ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
-                : value
+            value.length > (need || 12)
+            ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
+            : value
         )
     }
 
@@ -277,9 +434,26 @@ const SignPage = () => {
     return (
         <div className="prepare-document-box">
             <Modal
+                handleSign={ handleSign }
                 open={ open }
                 handleClose={ handleClose }
+                type={ openType }
             />
+            <Snackbar
+                open={ openTip }
+                autoHideDuration={ 6000 }
+                onClose={ () => { setOpenTip(false); } }
+                message="请完成签名"
+                severity="info"
+                anchorOrigin={ {
+                    vertical: "top",
+                    horizontal: "right"
+                } }
+            >
+                <MuiAlert elevation={ 6 } variant="filled" severity="info" sx={ { width: '100%' } } >
+                    请完成签名！
+                </MuiAlert>
+            </Snackbar>
             <div className="canvas-panal">
                 <div className="doc-box">
                     <Document
@@ -294,7 +468,11 @@ const SignPage = () => {
             </div>
             <div className="action-panal">
                 <footer>
-                    <Button variant="contained">完成</Button>
+                    {
+                        !!data.status
+                            ? <Button variant="contained" onClick={ save }>下载</Button>
+                            : <Button variant="contained" onClick={ handleCompleteSign }>完成</Button>
+                    }
                 </footer>
             </div>
         </div>

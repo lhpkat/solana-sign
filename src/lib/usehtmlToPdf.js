@@ -33,6 +33,7 @@ async function getCanvasByDom(canvasDom) {
   }).then((canvas_) => {
     return canvas_;
   })
+
   return canvas;
 }
 

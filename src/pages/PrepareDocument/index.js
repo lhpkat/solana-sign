@@ -119,7 +119,7 @@ const PrepareDocument = () => {
             originY: 'center',
         });
         const text = new fabric.Text(handleSubString(activeSigner.current), {
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: 400,
             fontFamily: 'BlinkMacSystemFont',
             originX: 'center',
@@ -155,7 +155,8 @@ const PrepareDocument = () => {
     }
 
     const saveSignInfo = () => {
-        setSignGroupInfo(info.slice().map(item => ({
+        setSignGroupInfo(info.slice().map((item, index) => ({
+            id: index,
             address: item.address,
             page: item.page,
             type: item.type,

@@ -39,10 +39,8 @@ const Review = () => {
 
     const handleSend = async () => {
         // const test = bs58.decode("3md7BBV9wFjYGnMWcMNyAZcjca2HGfXWZkrU8vvho66z2sJMZFcx6HZdBiAddjo2kzgBv3uZoac3domBRjJJSXkbBvokxPLqkN2gx8C5DroAWtsLPjGFXrADuB4ZCjZTbwT3N15hwriTfHBJhcvdcfrChkCVnjHnD6atddBzmgyMAMnfjQGys6ArKh2JQYEXthAEZpzmPxwyu2jYbFXSeqNexT176bt1hhMm4dwCCaVLs7yQpfwjcrSJWppjHt3s3niUgFfEMVStNRdjv5S3A1ksTJwgBiLEWAfcb")
-        // console.log(test);
-        
+
         // const keyPair = Keypair.fromSecretKey(test);
-        // console.log({keyPair});
         let signersStr = "";
 
         signGroupInfo.forEach((item, index) => {
@@ -54,6 +52,7 @@ const Review = () => {
                     + item.height + ","
                     + item.width + ","
                     + item.page + ","
+                    // + item.id + ","
                     + item.type
             } else {
                 signersStr = signersStr + ";"
@@ -63,6 +62,7 @@ const Review = () => {
                 + item.height + ","
                 + item.width + ","
                 + item.page + ","
+                // + item.id + ","
                 + item.type
             }
         });
@@ -97,10 +97,6 @@ const Review = () => {
             })
         }
     }
-
-    useEffect(() => {
-        console.log('data', data);
-    }, [data])
 
     return (
         <div className="review-box">

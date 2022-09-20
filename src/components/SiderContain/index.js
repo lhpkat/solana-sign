@@ -22,7 +22,7 @@ const SliderContain = () => {
 
     useEffect(() => {
         const { pathname = '' } = location;
-        console.log({location}, pathToStep[pathname]);
+
         setStep(pathToStep[pathname]);
     }, [location]);
 

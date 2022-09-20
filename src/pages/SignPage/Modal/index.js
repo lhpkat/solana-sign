@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, forwardRef } from 'react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -14,9 +15,11 @@ import Box from '@mui/material/Box';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+// import { zhCN } from '@mui/x-date-pickers/locales';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
-import SignatureDom from './SigntureDom';
+// import { Checkbox } from 'antd';
+import SignatureDom from './SignatureDom';
 import {
     BorderOutlined,
     Loading3QuartersOutlined,
@@ -24,9 +27,13 @@ import {
     WalletOutlined,
     FontSizeOutlined,
 } from '@ant-design/icons';
+import { getCanvasByDom } from '../../../lib';
 import { useAtomValue } from 'jotai';
 import { currentUserAtom, signersAtom } from '../../../store';
 import './index.css';
+
+dayjs.locale('zh-cn');
+
 
 const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
@@ -59,19 +66,23 @@ const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const Modal = ({ open, handleClose }) => {
+const Modal = ({ open, handleClose, type, handleSign }) => {
     const currentUser = useAtomValue(currentUserAtom);
     const [value, setValue] = useState(0);
-    const [time, setTime] = useState(dayjs().format("YYYY/MM/DD HH:mm"));
+    // const [time, setTime] = useState(dayjs().format("YYYY/MM/DD HH:mm A"));
+    const [time, setTime] = useState(dayjs());
     const [checked, setChecked] = useState(false);
-    const [textValue, setTextValue] = useState('')
+    const [textValue, setTextValue] = useState('');
+    const signatureDomRef = useRef(null);
+    const checkBoxRef = useRef(null);
+
 
     const handleTimeChange = (value) => {
-        setTime(value);
+        // setTime(dayjs(value).format("YYYY/MM/DD HH:mm A"));
+        setTime(dayjs(value));
     };
 
     const handleChange = (event, newValue) => {
-        console.log({ newValue });
         setValue(newValue);
     };
 
@@ -82,7 +93,7 @@ const Modal = ({ open, handleClose }) => {
             zhName: "不指定",
             icon: <Loading3QuartersOutlined />,
             label: (
-                <SignatureDom />
+                <SignatureDom ref={ signatureDomRef } />
             )
         },
         {
@@ -91,11 +102,15 @@ const Modal = ({ open, handleClose }) => {
             zhName: "日期",
             icon: <CalendarOutlined />,
             label: (
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider
+                    // adapterLocale="zh-cn"
+                    dateAdapter={ AdapterDayjs }
+                >
                     <DateTimePicker
                         label="签名时间"
-                        value={time}
-                        onChange={handleTimeChange}
+                        value={ time }
+                        onChange={ handleTimeChange }
+                        inputFormat="YYYY/MM/DD HH:mm A"
                         renderInput={ (params) => {
                             return (
                                 <TextField {...params} />
@@ -112,6 +127,7 @@ const Modal = ({ open, handleClose }) => {
             icon: <BorderOutlined />,
             label: (
                 <Checkbox
+                    ref={ checkBoxRef }
                     checked={ checked }
                     onChange={ (e) => {
                         setChecked(e.target.checked)
@@ -145,11 +161,11 @@ const Modal = ({ open, handleClose }) => {
         }
     ];
 
-    const handleSubString = (value) => {
+    const handleSubString = (value, ) => {
         return (
             value.length > 12
-                ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
-                : value
+            ? value.substring(0, 8) + '...' + value.substring(value.length - 6)
+            : value
         )
     }
 
@@ -161,28 +177,86 @@ const Modal = ({ open, handleClose }) => {
         )
     }
 
+    const handleSignature = async () => {
+        switch (value) {
+            case 0:
+                handleSign(value, signatureDomRef.current.signature());
+                break;
+
+            case 1:
+                handleSign(value, dayjs(time).format("YYYY/MM/DD HH:mm A"));
+                break;
+
+            case 2:
+                const checkDom = await getCanvasByDom(checkBoxRef.current);
+
+                handleSign(value, checkDom);
+                break;
+
+            case 3:
+                handleSign(value, currentUser);
+                break;
+
+            case 4:
+                handleSign(value, textValue);
+                break;
+
+            default:
+                break;
+        }
+        handleClose();
+    }
+
+    useEffect(() => {
+        const findIndex = signType.findIndex(item => (item.name === type || item.id === type));
+
+        setValue(findIndex);
+    }, [type])
+
     return (
         <div className="modal-box">
             <Dialog
                 open={open}
                 TransitionComponent={Transition}
                 keepMounted
-                onClose={handleClose}
-                // aria-describedby="alert-dialog-slide-description"
+                onClose={ handleClose }
+                aria-describedby="alert-dialog-slide-description"
             >
-                {/* <DialogTitle></DialogTitle> */}
+                {/* <DialogTitle></DialogTitle> */ }
+
                 <DialogContent>
                     <Box sx={{ width: '100%', minHeight: "200px" }}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                            <Tabs
+                                value={ value }
+                                onChange={ handleChange }
+                                aria-label="basic tabs example"
+                            >
                                 {
                                     signType.map(((item, index) => {
-                                        if (index === 0) return (
-                                            <Tab label="签名" { ...a11yProps(item.id) } />
-                                        );
+                                        if (index === 0) {
+                                            return (
+                                                <Tab
+                                                    key={ item.id }
+                                                    label="签名"
+                                                    // disabled={ !(type === item.id || type === item.name) }
+                                                    { ...a11yProps(item.id) }
+                                                />
+                                            );
+                                        }
 
                                         return (
-                                            <Tab label={ item.zhName } { ...a11yProps(item.id) } />
+                                            <Tab
+                                                key={ item.id }
+                                                label={ item.zhName }
+                                                // disabled={
+                                                //     !(type === item.id ||
+                                                //     type === item.name ||
+                                                //     type === signType[0].id ||
+                                                //     type === signType[0].name)
+                                                // }
+                                                { ...a11yProps(item.id) }
+                                            />
                                         )
                                     }))
                                 }
@@ -191,6 +265,7 @@ const Modal = ({ open, handleClose }) => {
                         {
                             signType.map(item => (
                                 <TabPanel
+                                    key={ item.id }
                                     value={ value }
                                     index={ item.id }
                                     className="tab-panel-box"
@@ -203,7 +278,7 @@ const Modal = ({ open, handleClose }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={ handleClose }>取消</Button>
-                    <Button variant="contained" onClick={ handleClose }>签名</Button>
+                    <Button variant="contained" onClick={ handleSignature }>签名</Button>
                 </DialogActions>
             </Dialog>
         </div>

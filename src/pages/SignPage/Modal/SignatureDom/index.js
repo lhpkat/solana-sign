@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect, forwardRef } from 'react';
+import React, { useState, useRef, useImperativeHandle, useEffect, forwardRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import Button from '@mui/material/Button';
 import Slider from '@mui/material/Slider';
@@ -7,10 +7,18 @@ import cx from "classnames";
 import './index.css';
 
 
-const SignatureDom = () => {
+const SignatureDom = (props, ref) => {
     const SignatureCanvasRef = useRef(null);
     const [penColor, setPenColor] = useState('red');
     const [fontSize, setFontSize] = useState(16);
+
+    useImperativeHandle(ref, () => {
+        return {
+            signature() {
+                return SignatureCanvasRef.current.toDataURL();
+            }
+        }
+    })
 
     const penColorList = [
         "#1976d2",
@@ -35,27 +43,28 @@ const SignatureDom = () => {
                             onClick={ () => {
                                 setPenColor(item)
                             } }
+                            key={ item }
                         ></div>
                     ))
                 }
             </div>
             <div className="font-size-box">
                 <Slider
-                    aria-label="Temperature"
-                    getAriaValueText={ (value) => `${value}px` }
-                    getAriaLabel={ (value) => `${value}px` }
+                    aria-label="Default"
                     valueLabelDisplay="auto"
-                    step={ 1 }
-                    marks
-                    min={ 12 }
-                    max={ 24 }
+                    // getAriaValueText={ (value) => `${value}px` }
+                    // getAriaLabel={ (value) => `${value}px` }
+                    // step={ 1 }
+                    // marks
+                    min={ 5 }
+                    max={ 50 }
                     value={ fontSize }
                     onChange={ (e) => {
                         setFontSize(e.target.value);
                     } }
                 />
             </div>
-            <div className="action-box">
+            <div className="canvas-action-box">
                 <div className="action-panel">
                     <Button variant="contained"
                         onClick={ () => {
@@ -83,4 +92,4 @@ const SignatureDom = () => {
     )
 }
 
-export default SignatureDom;
+export default forwardRef(SignatureDom);

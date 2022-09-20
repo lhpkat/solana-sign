@@ -66,5 +66,5 @@ export const fetchSignFile = (params) => {
 
 // 文件签名操作
 export const fetchToSign = (params) => {
-    return get(`${baseUrl}/sign_file`, params);
+    return post(`${baseUrl}/sign_file`, params);
 }
