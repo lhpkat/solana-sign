@@ -207,11 +207,18 @@ const Recipients = () => {
             </div>
             <footer>
                 <Link to="/create">
-                    <Button  variant="contained">返回</Button>
+                    <Button variant="contained">
+                        返回
+                    </Button>
                 </Link>
-                <Link to="/prepare-document">
-                    <Button  variant="contained">下一步</Button>
-                </Link>
+                <Button
+                    variant="contained"
+                    disabled={ !Object.keys(signers)?.length }
+                >
+                    <Link to="/prepare-document">
+                        下一步
+                    </Link>
+                </Button>
             </footer>
         </div>
     )

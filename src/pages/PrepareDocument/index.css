@@ -4,27 +4,24 @@
 }
 
 .canvas-panal {
-    width: 520px;
+    /* width: 520px; */
     height: 650px;
+    padding: 30px 20px 20px;
     flex-shrink: 0;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
-.overflow-hidden {
-    overflow: hidden;
-}
-
 .canvas-panal::-webkit-scrollbar {
-    /* width: 5px; */
-    width: 0;
+    width: 5px;
     height: 100%;
-    background-color: #c1b2b2;
+    background-color: #f0f2f5;
     border-radius: 2px;
 }
 
 .canvas-panal::-webkit-scrollbar-track {
-    background-color: #eadede;
+    margin: 30px 0;
+    background-color: #f0f2f5;
 }
 
 .canvas-panal::-webkit-scrollbar-thumb {
@@ -51,6 +48,7 @@
     /* width: 300px; */
     flex: 1;
     padding: 20px;
+    margin-left: 30px;
 }
 
 .sign-box {
@@ -81,7 +79,7 @@
     font-size: 20px;
     line-height: 24px;
     font-weight: 600;
-    margin: 10px 0 10px;
+    margin: 30px 0 20px;
 }
 
 .divide {
@@ -106,9 +104,14 @@
 .sign-dom {
     width: 200px;
     height: 150px;
-    background-color: rgba(234, 241, 255, 0.7);
+    /* background-color: rgba(234, 241, 255, 0.7); */
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 10px;
     line-height: 150px;
     text-align: center;
     font-size: 16px;
+}
+
+footer>button:first-child {
+    margin-right: 20px;
 }

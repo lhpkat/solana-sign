@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { message, Select } from 'antd';
+import { message } from 'antd';
 import Button from '@mui/material/Button';
 import {
     BorderOutlined,
@@ -9,24 +9,20 @@ import {
     FontSizeOutlined,
 } from '@ant-design/icons';
 import { Link } from "react-router-dom";
-import cx from "classnames";
-import { jsPDF } from "jspdf";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import { Document, Page, pdfjs } from "react-pdf";
 import PDFMerger from 'pdf-merger-js/browser';
 import { Buffer } from 'buffer';
 import { fabric } from "fabric";
 import { useAtomValue, useSetAtom } from 'jotai';
 import { fileListAtom, signersAtom, signGroupInfoAtom, pdfFileAtom } from '../../store';
-import {
-    getCanvasByDom,
-    canvasToPdf,
-    downPdf,
-    useListenAndCreateSignView
-} from '../../lib';
+import { useListenAndCreateSignView } from '../../lib';
 import './index.css';
 
 
-const { Option } = Select;
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
 const PrepareDocument = () => {
@@ -111,25 +107,28 @@ const PrepareDocument = () => {
         const rect = new fabric.Rect({
             width: 200,
             height: 150,
-            fill: '#eaf1ff',
-            opacity: 0.7,
+            // fill: '#eaf1ff',
+            fill: '#fff',
+            opacity: 0.8,
             rx: 10,
             ry: 10,
             originX: 'center',
             originY: 'center',
         });
-        const text = new fabric.Text(handleSubString(activeSigner.current), {
-            fontSize: 16,
+        const text = new fabric.Text(signType[activeSelectType.current].name, {
+            fontSize: 20,
             fontWeight: 400,
             fontFamily: 'BlinkMacSystemFont',
             originX: 'center',
             originY: 'center',
         });
-        const text_desc = new fabric.Text("在此签名", {
+        const text_desc = new fabric.Text(`签名: ${ handleSubString(activeSigner.current) }`, {
             fontSize: 12,
             color: '#e8e8e8',
-            left: 30,
-            top: 50,
+            originX: "right",
+            originY: "bottom",
+            left: 90,
+            top: 65,
         });
         const group = new fabric.Group([rect, text, text_desc], {
             width: 200,
@@ -140,6 +139,8 @@ const PrepareDocument = () => {
             lockRotation: true,
             rotatingPointOffset: false,
         });
+
+        group.setControlVisible("mtr", false);
 
         setInfo(info => ([
             ...info,
@@ -196,17 +197,17 @@ const PrepareDocument = () => {
         setPdfMetaData(url);
     }
 
-    const handleActiverChange = (value) => {
-        activeSigner.current = value;
+    const handleActiverChange = (e) => {
+        activeSigner.current = e.target.value;
     }
 
-    const handleSelectTypeChange = (value) => {
+    const handleSelectTypeChange = (e) => {
         if (!activeSigner.current) {
             message.error("请选择一位签名者！");
             return;
         };
 
-        activeSelectType.current = value;
+        activeSelectType.current = e.target.value;
         startListen.current = true;
         starter();
     }
@@ -271,6 +272,10 @@ const PrepareDocument = () => {
         })
     }, [info])
 
+    useEffect(() => {
+        setInfo([])
+    }, [])
+
     return (
         <div className="prepare-document-box">
             <FloatModal />
@@ -286,45 +291,74 @@ const PrepareDocument = () => {
             </div>
             <div className="action-panal">
                 <div className="title">选择签名者</div>
-                <Select style={ { width: 240 } }
-                    onChange={ handleActiverChange }
-                >
-                    {
-                        Object.values(signers).map(item => (
-                            <Option
-                                value={ item }
-                                key={ item }
-                            >{ handleSubString(item) }</Option>
-                        ))
-                    }
-                </Select>
+                <FormControl fullWidth>
+                    <InputLabel id="signer-select-label">签名者</InputLabel>
+                    <Select
+                        id="signer-select"
+                        labelId="signer-select-label"
+                        style={ { width: 240 } }
+                        value={ activeSigner.current }
+                        label="签名者"
+                        onChange={ handleActiverChange }
+                    >
+                        {
+                            Object.values(signers).map(item => (
+                                <MenuItem 
+                                    value={ item }
+                                    key={ item }
+                                >
+                                    { handleSubString(item) }
+                                </MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
+
                 <div className="divide" />
+
                 <div className="title">选择签名类型</div>
-                <Select style={ { width: 240 } }
-                    onSelect={ handleSelectTypeChange }
-                >
-                    {
-                        signType.map(item => (
-                            <Option
-                                value={ item.id }
-                                key={ item.name }
-                            >
-                                { item.icon }
-                                <span className='option-type-name'>
-                                    { item.name }
-                                </span>
-                            </Option>
-                        ))
-                    }
-                </Select>
+                <FormControl fullWidth>
+                    <InputLabel id="sign-type-select-label">签名类型</InputLabel>
+                    <Select
+                        id="sign-type-select"
+                        labelId="sign-type-select-label"
+                        label="签名类型"
+                        style={ { width: 240 } }
+                        value={ activeSelectType.current }
+                        onChange={ handleSelectTypeChange }
+                    >
+                        {
+                            signType.map(item => (
+                                <MenuItem 
+                                    value={ item.id }
+                                    key={ item.name }
+                                >
+                                    { item.icon }
+                                    <span className='option-type-name'>
+                                        { item.name }
+                                    </span>
+                                </MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
 
                 <footer>
-                    <Link to="/recipients">
-                        <Button  variant="contained">返回上一步</Button>
-                    </Link>
-                    <Link to="/review">
-                        <Button  variant="contained">下一步</Button>
-                    </Link>
+                    <Button
+                        variant="contained"
+                    >
+                        <Link to="/recipients">
+                            返回
+                        </Link>
+                    </Button>
+                    <Button
+                        variant="contained"
+                        disabled={ !info?.length }
+                    >
+                        <Link to="/review">
+                            下一步
+                        </Link>
+                    </Button>
                 </footer>
             </div>
         </div>

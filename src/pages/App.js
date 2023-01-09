@@ -11,36 +11,36 @@ import './App.css';
 const { Footer, Sider, Content } = Layout;
 
 
-const App = ({ dispatch }) => {
-  let location = useLocation();
-  useEffect(() => {
-    bindPushState();
-  }, [])
+const App = () => {
 
-  return (
-    <div className="App">
-      <Layout>
-        <Sider
-          width='20%'
-          theme="light"
-          className='sider-box'
-        >
-          <SiderContain />
-        </Sider>
-        <Layout>
-          <Content className="layout-content">
-            <Routes />
-          </Content>
-          {/* <Footer>
-            {
-              location.pathname !== '/' &&
-              <PageFooter />
-            }
-          </Footer> */}
-        </Layout>
-      </Layout>
-    </div>
-  );
+    useEffect(() => {
+        bindPushState();
+    }, [])
+
+    return (
+        <div className="App">
+            <Layout>
+                <Sider
+                    width='20%'
+                    theme="light"
+                    className='sider-box'
+                >
+                    <SiderContain />
+                </Sider>
+                <Layout>
+                    <Content className="layout-content">
+                        <Routes />
+                    </Content>
+                    {/* <Footer>
+                        {
+                        location.pathname !== '/' &&
+                        <PageFooter />
+                        }
+                    </Footer> */}
+                </Layout>
+            </Layout>
+        </div>
+    );
 }
 
-export default connect()(App);
+export default App;

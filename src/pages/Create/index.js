@@ -130,11 +130,18 @@ const Create = () => {
                     }
                     <div>
                         <Link to="/">
-                            <Button  variant="contained">返回</Button>
+                            <Button
+                                variant="contained"
+                            >返回</Button>
                         </Link>
-                        <Link to="/recipients">
-                            <Button  variant="contained">下一步</Button>
-                        </Link>
+                        <Button
+                            variant="contained"
+                            disabled={ !Object.keys(fileList).length }
+                        >
+                            <Link to="/recipients">
+                                下一步
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </div>

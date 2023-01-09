@@ -62,6 +62,9 @@ const Wallet = () => {
     const disconnect = () => {
         getProvider().disconnect();
         setCurrentUser('');
+        if (window.location.pathname !== "/") {
+            window.location.href = "/";
+        }
     }
 
     const paste = (data) => {

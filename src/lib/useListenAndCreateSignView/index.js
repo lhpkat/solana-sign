@@ -26,8 +26,8 @@ const useListenAndCreateSignView = (ChildrenDom, canClickDown = true, callback) 
                 style={{
                     // top: screenY - 75,
                     // left: screenX - 100,
-                    top: screenY + 5,
-                    left: screenX + 5
+                    top: screenY,
+                    left: screenX
                 }}
             >
                 {

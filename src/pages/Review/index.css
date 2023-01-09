@@ -2,7 +2,7 @@
     font-size: 20px;
     line-height: 24px;
     font-weight: 600;
-    margin: 10px 0 10px;
+    margin: 30px 0 20px;
 }
 
 .sub-title {
@@ -15,6 +15,20 @@
 .signers-box {
     display: flex;
     flex-wrap: wrap;
+}
+
+.signer,
+.viewer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 100%;
+}
+
+.signer>div,
+.viewer>div {
+    color: #999;
+    font-size: 12px;
 }
 
 .signers-box>div {

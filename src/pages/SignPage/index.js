@@ -9,7 +9,8 @@ import {
     CalendarOutlined,
     WalletOutlined,
     FontSizeOutlined,
-    CheckSquareTwoTone
+    CheckSquareTwoTone,
+    EditOutlined
 } from '@ant-design/icons';
 import { Link, useLocation } from "react-router-dom";
 import cx from "classnames";
@@ -158,14 +159,17 @@ const SignPage = () => {
         const rect = new fabric.Rect({
             width: Math.ceil(info.width),
             height: Math.ceil(info.height),
-            fill: '#e8e8e8',
+            fill: '#eeffff',
             // fill: '#fff',
-            opacity: 0.5,
+            opacity: 0.8,
             rx: 10,
             ry: 10,
             originX: 'center',
             originY: 'center',
+            borderColor: "red",
+            hasBorders: true,
         });
+
         let mainInfo;
 
         if (!!expends) {
@@ -202,7 +206,7 @@ const SignPage = () => {
             }
         } else {
             mainInfo = new fabric.Text(
-                signType[signType.findIndex(item => (item.id === info.signType || item.name === info.signType))].zhName,
+                signType[signType.findIndex(item => (item.id == info.signType || item.name === info.signType))]?.zhName || "",
                 {
                     fontSize: 20,
                     fontWeight: 400,
@@ -233,12 +237,16 @@ const SignPage = () => {
                 // subTargetCheck: true,
                 lockMovementX: true,
                 lockMovementY: true,
-                hasBorders: false
+                // hasBorders: false,
+                borderDashArray: [8, 6],
+                borderScaleFactor: 2,
+                borderColor: "red",
             });
-    
+
             group.on('mousedown', function (options) {
                 if (!!info.status || info.address !== currentUser) return;
-    
+                
+                console.log({options});
                 handleClickOpen(info.signType);
                 setActiveGroup({
                     canvas: fabricCanvas,
@@ -246,7 +254,7 @@ const SignPage = () => {
                     id: info.id,
                 });
             });
-    
+
             fabricCanvas.add(group);
 
             if (info.address === currentUser) {
@@ -273,7 +281,6 @@ const SignPage = () => {
                 }
             }
         }, 100)
-
     }
 
     const handleSign = (type, info) => {
@@ -365,7 +372,7 @@ const SignPage = () => {
         } else {
             filterData.forEach(item => {
                 fetchToSign({
-                    ...item,
+                    // ...item,
                     sign_raw: item.raw,
                     id: data.id,
                     address: currentUser
@@ -468,10 +475,19 @@ const SignPage = () => {
             </div>
             <div className="action-panal">
                 <footer>
+                    <Link to="/">
+                        <Button variant="contained">
+                            返回
+                        </Button>
+                    </Link>
                     {
                         !!data.status
                             ? <Button variant="contained" onClick={ save }>下载</Button>
-                            : <Button variant="contained" onClick={ handleCompleteSign }>完成</Button>
+                            : <Button
+                                variant="contained"
+                                onClick={ handleCompleteSign }
+                                disabled={ !!needSignGroup.filter(item => !item.raw).length }
+                            >完成</Button>
                     }
                 </footer>
             </div>

@@ -208,7 +208,7 @@ const Modal = ({ open, handleClose, type, handleSign }) => {
     }
 
     useEffect(() => {
-        const findIndex = signType.findIndex(item => (item.name === type || item.id === type));
+        const findIndex = signType.findIndex(item => (item.name === type || item.id == type));
 
         setValue(findIndex);
     }, [type])
@@ -239,7 +239,7 @@ const Modal = ({ open, handleClose, type, handleSign }) => {
                                                 <Tab
                                                     key={ item.id }
                                                     label="签名"
-                                                    // disabled={ !(type === item.id || type === item.name) }
+                                                    disabled={ !(type == item.id || type === item.name) }
                                                     { ...a11yProps(item.id) }
                                                 />
                                             );
@@ -249,12 +249,12 @@ const Modal = ({ open, handleClose, type, handleSign }) => {
                                             <Tab
                                                 key={ item.id }
                                                 label={ item.zhName }
-                                                // disabled={
-                                                //     !(type === item.id ||
-                                                //     type === item.name ||
-                                                //     type === signType[0].id ||
-                                                //     type === signType[0].name)
-                                                // }
+                                                disabled={
+                                                    !(type == item.id ||
+                                                    type === item.name ||
+                                                    type == signType[0].id ||
+                                                    type === signType[0].name)
+                                                }
                                                 { ...a11yProps(item.id) }
                                             />
                                         )

@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Input } from 'antd';
+import {
+    EditOutlined,
+} from '@ant-design/icons';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Card from '@mui/material/Card';
 import { Link } from "react-router-dom";
 import bs58 from "bs58";
 import { useAtomValue } from 'jotai';
@@ -105,36 +110,51 @@ const Review = () => {
             <div className="signers-box">
                 {
                     Object.keys(signers).map(item => (
-                        <div className="signer">
-                            { handleSubString(item) }
-                            <div>签名人</div>
-                        </div>
+                        <Card sx={ { minWidth: 200 } } key={ item }>
+                            <div className="signer">
+                                { handleSubString(item) }
+                                <div><EditOutlined /> 签名人</div>
+                            </div>
+                        </Card>
                     ))
                 }
                 {
                     Object.keys(viewers).map(item => (
-                        <div className="viewer">
-                            { handleSubString(item) }
-                            <div>阅览人</div>
-                        </div>
+                        <Card sx={ { minWidth: 200 } } key={ item }>
+                            <div className="viewer">
+                                { handleSubString(item) }
+                                <div>阅览人</div>
+                            </div>
+                        </Card>
                     ))
                 }
             </div>
             <div className='sub-title'>设置合同名</div>
-            <Input
+            <TextField
+                label="合同名"
+                variant="standard"
                 placeholder={ pdfFile.name }
                 value={ contractName }
                 onChange={ (e) => {
                     setContractName(e.target.value)
                 } }
+                style={ {
+                    minWidth: "300px"
+                } }
             />
             <footer>
                 <Link to="/prepare-document">
-                    <Button  variant="contained">上一步</Button>
+                    <Button variant="contained">
+                        返回
+                    </Button>
                 </Link>
-                <Button  variant="contained" onClick={ () => {
-                    handleSend();
-                } }>发送</Button>
+                <Button
+                    variant="contained"
+                    disabled={ !contractName }
+                    onClick={ () => {
+                        handleSend();
+                    } }
+                >发送</Button>
             </footer>
         </div>
     )
